@@ -10,10 +10,10 @@ get_characters_after_dot(string)
 \item{variable}{Character string.}
 }
 \value{
-Character string.
+Character string. If there was no period, returns a blank ("")
 }
 \description{
-Get all charcters following the last dot in a character string
+Get all charcters following the last period in a character string
 }
 \examples{
 get_characters_after_dot("ab.cde")

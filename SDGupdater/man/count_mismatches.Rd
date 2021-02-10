@@ -13,7 +13,7 @@ count_mismatches(number_var_1, number_var_2)
 Number of mismatches.
 }
 \description{
-Counts the number of mismatches between two number vectors.
+Counts the number of mismatches between two number vectors of the same length.
 }
 \examples{
 correct_number <- c(1:4)

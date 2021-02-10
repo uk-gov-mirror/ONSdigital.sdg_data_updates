@@ -1,6 +1,6 @@
 #' Count mismatches between numbers
 #'
-#' Counts the number of mismatches between two number vectors.
+#' Counts the number of mismatches between two number vectors of the same length.
 #'
 #' @param number_var_1,number_var_2 Numeric vector.
 #'
@@ -18,7 +18,9 @@
 #' @export
 count_mismatches <- function(number_var_1, number_var_2)  {
 
-  comparison <- ifelse(number_var_1 == number_var_2, 0, 1)
+  data_frame <- data.frame(var1 = number_var_1, var2 = number_var_2)
+  no_NAs <- na.omit(data_frame)
+  comparison <- ifelse(no_NAs$number_var_1 == no_NAs$number_var_2, 0, 1)
   mismatch_count <- sum(comparison, na.rm = TRUE)
   return(mismatch_count)
 
@@ -75,15 +77,17 @@ count_mismatches <- function(number_var_1, number_var_2)  {
 #' @export
 count_max_decimal_places <- function (value) {
 
-  character_count <- count_decimal_places_as_string(value)
+  no_NAs <- na.omit(value)
+
+  character_count <- count_decimal_places_as_string(no_NAs)
 
   numeric_count <- c()
 
-  for (i in 1:length(value)) {
-    numeric_count[i] <- count_decimal_places_numerically(value[i])
+  for (i in 1:length(no_NAs)) {
+    numeric_count[i] <- count_decimal_places_numerically(no_NAs[i])
   }
 
-  counts_match <- ifelse(sum(numeric_count == character_count) == length(value), TRUE, FALSE)
+  counts_match <- ifelse(sum(numeric_count == character_count) == length(character_count), TRUE, FALSE)
 
   if (counts_match == FALSE) {
     warning("calculations of number of decimal places disagree between methods. Please check number of decimal places given for calculations are as expected")
