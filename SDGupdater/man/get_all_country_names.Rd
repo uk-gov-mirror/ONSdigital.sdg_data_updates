@@ -2,9 +2,12 @@
 % Please edit documentation in R/functions_for_info_above_column_names.R
 \name{get_all_country_names}
 \alias{get_all_country_names}
+\alias{multiple_country_warning}
 \title{Extract country from string containing country name}
 \usage{
 get_all_country_names(variable)
+
+multiple_country_warning(filename, tab, description)
 }
 \arguments{
 \item{variable}{Character vector you want to check to see if it contains the

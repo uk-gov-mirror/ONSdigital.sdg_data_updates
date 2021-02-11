@@ -1,5 +1,3 @@
-library(roxygen2)
-
 #' Get penultimate character
 #'
 #' Get the second to last character of a string

@@ -61,6 +61,18 @@ get_all_country_names <- function (variable) {
 
 }
 
+#' @rdname get_all_country_names
+#'
+#' @export
+multiple_country_warning <- function (filename, tab, description) {
+
+  if (grepl(",", country) == TRUE) {
+    warning(paste("More than one country identified from info above the column headings in",
+                  filename, tab, "where only one year was expected.
+  \nTO DO: Please check that Country is correct in the output for", description))
+  }
+}
+
 #' Extract years from strings
 #'
 #' Identifies whether a string contains a number that looks like a year from the
@@ -92,6 +104,19 @@ get_all_years <- function (variable) {
                           str_extract_all(variable, year_pattern), NA)
 
   list_into_vector_of_strings(list_of_years)
+
+}
+
+#' @rdname get_all_years
+#'
+#' @export
+multiple_year_warning <- function (filename, tab, description) {
+
+  if (nchar(year) > 4) {
+    warning(paste("More than one year identified from info above the column headings in",
+                  filename, tab, "where only one year was expected.
+  \nTO DO: Please check that Year is correct in the output for", description))
+  }
 
 }
 

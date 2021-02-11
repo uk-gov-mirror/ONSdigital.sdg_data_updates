@@ -2,9 +2,12 @@
 % Please edit documentation in R/functions_for_info_above_column_names.R
 \name{get_all_years}
 \alias{get_all_years}
+\alias{multiple_year_warning}
 \title{Extract years from strings}
 \usage{
 get_all_years(variable)
+
+multiple_year_warning(filename, tab, description)
 }
 \arguments{
 \item{variable}{Character vector.}
