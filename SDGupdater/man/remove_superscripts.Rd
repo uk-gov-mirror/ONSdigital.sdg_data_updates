@@ -25,7 +25,8 @@ could_contain_superscript(variable)
 Character vector.
 }
 \description{
-Remove superscripts, whether they are read as actual superscripts or just as numbers.
+Remove superscripts, whether they are read as actual
+superscripts or just as numbers.
 }
 \examples{
 character <- c("Wales1","Ratesæˆ¼ã¸²", "Numbers1,2")

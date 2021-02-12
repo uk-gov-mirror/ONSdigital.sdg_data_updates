@@ -24,8 +24,8 @@ dataframe created using xlsx_cells
 Assumes that the cell containing the year ends with the year
 }
 \examples{
-first_header_row <- 4
-test_dat <- data.frame(row = c(1:5), character = c("data for 2017 ", "England and", "this is Wales", "impala", "elephant"))
+first_header_row <- 4 test_dat <- data.frame(row = c(1:5), character =
+c("data for 2017 ", "England and", "this is Wales", "impala", "elephant"))
 get_info_cells(test_dat, first_header_row)
 
 }

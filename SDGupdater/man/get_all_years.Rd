@@ -22,8 +22,9 @@ it returns NA. If it contains more than one year, all years are returned as a
 comma separated string
 }
 \examples{
-test_dat <- c("a date: 2005", "1995 6", "1993 end", "a1995", "1995a", "a date:1995, another date: 2012",
-              "not a date: 475", "also not a date: 1234", "abc 12345",  "34200943", "190932")#' get_all_country_names(test_dat)
+test_dat <- c("a date: 2005", "1995 6", "1993 end", "a1995", "1995a", "a
+date:1995, another date: 2012", "not a date: 475", "also not a date: 1234",
+"abc 12345",  "34200943", "190932")#' get_all_country_names(test_dat)
 get_all_years(test_dat)
 
 }

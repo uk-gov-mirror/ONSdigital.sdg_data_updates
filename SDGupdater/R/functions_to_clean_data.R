@@ -1,6 +1,7 @@
-#' Remove superscripts
+#' @title Remove superscripts
 #'
-#' Remove superscripts, whether they are read as actual superscripts or just as numbers.
+#' @description Remove superscripts, whether they are read as actual
+#'   superscripts or just as numbers.
 #'
 #' @param variable Character vector you want superscripts removed from.
 #'
@@ -25,7 +26,6 @@ remove_superscripts <- function(variable) {
 }
 
 #' @rdname remove_superscripts
-#'
 #' @export
 remove_real_superscripts <- function (variable) {
 
@@ -73,12 +73,14 @@ could_contain_superscript <- function (variable) {
 
 }
 
-#' Remove blanks and cells above the column headings
+#' @title Remove blanks and cells above the column headings
 #'
-#' Remove blanks and cells above the column headings to clean xlsx_cells data.
-#' Do this before using behead()
+#' @description Remove blanks and cells above the column headings to clean
+#'   xlsx_cells data. Do this before using behead()
 #'
-#' @importFrom dplyr %>% mutate filter
+#' @importFrom dplyr %>%
+#' @importFrom dplyr mutate
+#' @importFrom dplyr filter
 #'
 #' @param dat Tibble originaly imported using xlsx_cells.
 #' @param first_header_row Numeric. Row number of first row in the xlsx file
@@ -89,11 +91,10 @@ could_contain_superscript <- function (variable) {
 #' @export
 #'
 #' @examples
-#' test_dat <- dplyr::tibble(row = c(1:6),
-#'                    character = c("2017", NA, "England", "Rates", NA, NA),
-#'                    is_blank = c(FALSE, TRUE, FALSE, FALSE, TRUE, FALSE),
-#'                    data_type = c("character", "blank", "character", "character", "blank", "numeric"),
-#'                    numeric = c(NA, NA, NA, NA, NA, 20))
+#' test_dat <- dplyr::tibble(row = c(1:6), character = c("2017", NA, "England",
+#' "Rates", NA, NA), is_blank = c(FALSE, TRUE, FALSE, FALSE, TRUE, FALSE),
+#' data_type = c("character", "blank", "character", "character", "blank",
+#' "numeric"), numeric = c(NA, NA, NA, NA, NA, 20))
 #' remove_blanks_and_info_cells(test_dat, 4)
 remove_blanks_and_info_cells <- function(dat, first_header_row) {
 
@@ -103,9 +104,9 @@ remove_blanks_and_info_cells <- function(dat, first_header_row) {
 
 }
 
-#' Format region names
+#' @title Format region names
 #'
-#' Corrects the capitalisation of region names
+#' @description Corrects the capitalisation of region names
 #'
 #' @param variable Character vector of region names.
 #'
@@ -114,8 +115,8 @@ remove_blanks_and_info_cells <- function(dat, first_header_row) {
 #' @export
 #'
 #' @examples
-# test_dat <- tibble(Region = c("YORKSHIRE AND THE HUMBER", "EAST OF ENGLAND", "The shire"))
-# test_dat %>% mutate(Region = format_region_names(Region))
+#' test_dat <- tibble(Region = c("YORKSHIRE AND THE HUMBER", "EAST OF ENGLAND", "The shire"))
+#' test_dat %>% mutate(Region = format_region_names(Region))
 #'
 #' test_var <- c("YORKSHIRE AND THE HUMBER", "EAST OF ENGLAND", "The shire")
 #' Region <- format_region_names(test_var)

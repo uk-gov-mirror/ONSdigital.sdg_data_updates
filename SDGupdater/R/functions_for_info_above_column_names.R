@@ -15,8 +15,8 @@
 #' @return Tibble containing all year and country info.
 #'
 #' @examples
-#' first_header_row <- 4
-#' test_dat <- data.frame(row = c(1:5), character = c("data for 2017 ", "England and", "this is Wales", "impala", "elephant"))
+#' first_header_row <- 4 test_dat <- data.frame(row = c(1:5), character =
+#' c("data for 2017 ", "England and", "this is Wales", "impala", "elephant"))
 #' get_info_cells(test_dat, first_header_row)
 #'
 #' @export
@@ -45,8 +45,8 @@ get_info_cells <- function(dat, first_header_row) {
 #' @return Character vector giving name of country or NA.
 #'
 #' @examples
-#' test_dat <- c("England is a country of the UK", "this does not contain a country name")
-#' get_all_country_names(test_dat)
+#' test_dat <- c("England is a country of the UK", "this does not contain a
+#' country name") get_all_country_names(test_dat)
 #'
 #' @export
 get_all_country_names <- function (variable) {
@@ -87,8 +87,9 @@ multiple_country_warning <- function (filename, tab, description) {
 #' @return Character vector giving year or NA.
 #'
 #' @examples
-#' test_dat <- c("a date: 2005", "1995 6", "1993 end", "a1995", "1995a", "a date:1995, another date: 2012",
-#'               "not a date: 475", "also not a date: 1234", "abc 12345",  "34200943", "190932")#' get_all_country_names(test_dat)
+#' test_dat <- c("a date: 2005", "1995 6", "1993 end", "a1995", "1995a", "a
+#' date:1995, another date: 2012", "not a date: 475", "also not a date: 1234",
+#' "abc 12345",  "34200943", "190932")#' get_all_country_names(test_dat)
 #' get_all_years(test_dat)
 #'
 #' @export

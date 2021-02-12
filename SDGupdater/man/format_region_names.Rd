@@ -17,6 +17,8 @@ capitalisation.
 Corrects the capitalisation of region names
 }
 \examples{
+test_dat <- tibble(Region = c("YORKSHIRE AND THE HUMBER", "EAST OF ENGLAND", "The shire"))
+test_dat \%>\% mutate(Region = format_region_names(Region))
 
 test_var <- c("YORKSHIRE AND THE HUMBER", "EAST OF ENGLAND", "The shire")
 Region <- format_region_names(test_var)

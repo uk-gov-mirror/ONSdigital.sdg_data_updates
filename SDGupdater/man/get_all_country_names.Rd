@@ -22,7 +22,7 @@ countries and if it does, it gives the names of that country as a string,
 otherwise it returns NA.
 }
 \examples{
-test_dat <- c("England is a country of the UK", "this does not contain a country name")
-get_all_country_names(test_dat)
+test_dat <- c("England is a country of the UK", "this does not contain a
+country name") get_all_country_names(test_dat)
 
 }

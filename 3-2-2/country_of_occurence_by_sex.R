@@ -1,36 +1,19 @@
 # Author: Emma Wood
-# Date: 29/01/2021
+# Date (start): 29/01/2021
 # Purpose: To create csv data for country of occurrence: baby sex disaggregations for indicator 3.2.2
-# Requirements: This script is called by main.R. It calls functions.R.
+# Requirements:This script is called by compile_tables.R, which is called by main.R
 
+country_of_occurrence_by_sex_tab_name <- ask_user_for_tab_name("country of occurrence by sex", country_of_occurrence_by_sex_tab_name)
+first_header_row <- ask_user_for_first_header_row(country_of_occurrence_by_sex_tab_name, first_header_row_country_by_sex)
 
-is_table_name_correct <- menu(c("Yes", "No"),
-                              title = paste("Are country of occurrence by sex data in:", country_of_occurrence_by_sex_tab_name, "\n \n",
-                                            "(please type relevant number and hit enter)"))
+source_data <- xlsx_cells(paste0("Input/", filename), sheets = country_of_occurrence_by_sex_tab_name)
 
-if(is_table_name_correct == 2) {
-  stop("Please enter correct Table name between the quote marks after 'country_of_occurrence_by_sex_tab_name <- ', then re-run the script")
-} 
-
-if (get_characters_after_dot(filename) != "xlsx") {
-  stop(paste("File must be an xlsx file. Save", filename, "as an xlsx, update filename <- '', and re-run script"))
-}
-
-source_data <- xlsx_cells(filename, sheets = country_of_occurrence_by_sex_tab_name)
-
-info_cells <- get_info_cells(source_data, first_header_row_country_by_sex)
+info_cells <- get_info_cells(source_data, first_header_row)
 year <- unique_to_string(info_cells$Year)
 country <- unique_to_string(info_cells$Country)
 
-if (nchar(year) > 4) {
-  warning("More than one year identified from info above the column headings in the input file, where only one year was expected. \nTO DO: Please check that Year is correct in the output")
-}
-if (grepl(",", country) == TRUE) {
-  warning("More than one country identified from info above the column headings in the input file, where only one year was expected. \nTO DO: Please check that Country is correct in the output")
-}
-
 main_data <- source_data %>% 
-  remove_blanks_and_info_cells(first_header_row_country_by_sex) %>%
+  remove_blanks_and_info_cells(first_header_row) %>%
   mutate(character = remove_superscripts(character))
 
 tidy_data <- main_data %>%
@@ -53,7 +36,7 @@ data_for_calculations <- clean_data %>%
   pivot_wider(names_from = c(measure, rate_type, life_event_age, baby_age), 
               values_from = numeric) 
 
-# write function to remove NAs from column headings
+# TO DO: write function to remove NAs from column headings
 
 # In 2018 data 'Numbers' heading hasn't been pulled all the way to the left, so Births aren't included under that heading.
 if ("NA_NA_Births_Live births" %in% colnames(data_for_calculations)) {
@@ -62,7 +45,6 @@ if ("NA_NA_Births_Live births" %in% colnames(data_for_calculations)) {
   headings_standardised <- data_for_calculations
 }
 
-print("calculating late neonatal deaths")
 max_decimal_places_used_by_source <- count_max_decimal_places(data_for_calculations$`Rates_Per 1,000  live births_Childhood deaths_Neonatal`) 
 
 late_neonatal <- headings_standardised %>% 
@@ -74,12 +56,6 @@ late_neonatal <- headings_standardised %>%
                                                          `Numbers_NA_Births_Live births`, max_decimal_places_used_by_source))
 
 number_of_rate_calculation_mismatches <- count_mismatches(late_neonatal$Rates_Neonatal_check, late_neonatal$`Rates_Per 1,000  live births_Childhood deaths_Neonatal`)
-
-if(number_of_rate_calculation_mismatches != 0){
-  warning(paste("check of rate caclulations has failed.", 
-                number_of_rate_calculation_mismatches, "of", nrow(late_neonatal), "neonatal death rates do not match.",
-                "Calculations are performed in the block of code where 'late_neonatal' is created."))
-} 
 
 relevant_columns <- late_neonatal %>% 
   select(country, sex, area_code,
@@ -93,7 +69,7 @@ data_in_csv_format <- relevant_columns %>%
     names_to = "Neonatal_period",
     values_to = "Value")  
 
-clean_csv_data <- data_in_csv_format %>% 
+clean_csv_data_country_by_sex <- data_in_csv_format %>% 
   mutate(Neonatal_period = case_when(
     Neonatal_period == "Rates_Per 1,000  live births_Childhood deaths_Early" ~ "Early neonatal",
     Neonatal_period == "Rates_Late_neonatal" ~ "Late neonatal",
@@ -113,25 +89,26 @@ clean_csv_data <- data_in_csv_format %>%
          `Unit measure` = "Rate per 1,000 live births",
          `Unit multiplier` = "Units", 
          `Observation status` = "Undefined",
-         Value = ifelse(is.na(Value), "", Value)) %>% # this turns the value into a character string
+         Value = ifelse(is.na(Value), "", as.character(Value))) %>% # this turns the value into a character string
   select(Year, Sex, Country, Region, `Health board`, Birthweight, Age, `Neonatal period`, `Unit measure`, `Unit multiplier`, `Observation status`, GeoCode, Value)
 
 
-print("saving data")
-setwd('./Output')
-write.csv(clean_csv_data, paste0("country_by_sex_for_csv_", year, ".csv"), row.names = FALSE)
+multiple_year_warning(filename, country_of_occurrence_by_sex_tab_name,"country of occurrence by sex")
+multiple_country_warning(filename, country_of_occurrence_by_sex_tab_name,"country of occurrence by sex")
 
-current_directory <- getwd()
-print(paste0("Country by sex data have been created and formatted for ", year, ", and saved in '", current_directory, 
-             "' as 'country_by_sex_for_csv_", year, ".csv'"))
+if(number_of_rate_calculation_mismatches != 0){
+  warning(paste("check of rate caclulations has failed.", 
+                number_of_rate_calculation_mismatches, "of", nrow(late_neonatal), "neonatal death rates do not match.",
+                "Calculations are performed in the block of code where 'late_neonatal' is created."))
+} 
 
 # clean up environment as the same names are used for multiple scripts called in the same session
-rm(check_rate_calcs, check_rate_calcs_pass,
-   clean_csv_data, Countries,
+rm(clean_data, main_data,
    data_for_calculations, data_in_csv_format, 
+   headings_standardised, 
    info_cells, late_neonatal, source_data,
-   tidy_data, Years)
-
-setwd('..')
+   tidy_data, relevant_columns,
+   country, year, first_header_row,
+   max_decimal_places_used_by_source, number_of_rate_calculation_mismatches)
 
 
