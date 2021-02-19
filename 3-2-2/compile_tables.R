@@ -20,7 +20,7 @@ current_directory <- getwd()
 year <- unique_to_string(get_all_years(all_csv_data$Year))
 
 setwd('./Output')
-write.csv(all_csv_data, paste0("2_data_", year, ".csv"), row.names = FALSE)
+write.csv(all_csv_data, paste0("3-2-2_data_", year, ".csv"), row.names = FALSE)
 
 cat(paste0("csv for ", year, ", has been created and saved in '", current_directory, 
              "' as '3-2-2_data_", year, ".csv'", "\n\nFiles created for individual tabs can be viewed by clicking on them in the Global Environment."))
