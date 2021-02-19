@@ -1,16 +1,12 @@
 # Author: Emma Wood
 # Contact: emma.wood@ons.gov.uk
 # Date (start): 18/02/2021
-# Purpose: To create csv data for 13-2-2
+# Purpose: To create csv-format headline figures for 13-2-2
 # Requirements: This script is called by compile_tables.R, which is called by main.R
 
-library(readxl)
+source_data <- xlsx_cells(paste0("Input/", filename), sheets = headline_tab_name) 
 
-# source_data <- read_excel(paste0("Input/", filename), sheet = tab_name, skip = first_header_row-1,
-#                           trim_ws = TRUE) 
-source_data <- xlsx_cells(paste0("Input/", filename), sheets = tab_name) 
-
-info_cells <- get_info_cells(source_data, first_header_row)
+info_cells <- get_info_cells(source_data, headline_first_header_row)
 
 units <- info_cells %>% 
   filter(is.na(Year) & is.na(Country)) %>% 
@@ -19,9 +15,10 @@ units <- info_cells %>%
 
 years <- unique_to_string(info_cells$Year)
 latest_year <- max(as.numeric(strsplit(years, ",")[[1]]))
+earliest_year <- min(as.numeric(strsplit(years, ",")[[1]]))
 
 main_data <- source_data %>% 
-  remove_blanks_and_info_cells(first_header_row) %>%
+  remove_blanks_and_info_cells(headline_first_header_row) %>%
   mutate(character = remove_superscripts(character))
 
 tidy_data <- main_data %>%
@@ -29,14 +26,21 @@ tidy_data <- main_data %>%
   behead("left", Gas) %>% 
   select(Year, Gas, numeric)
 
-csv_data <- tidy_data %>% 
+headline_csv_data_by_gas <- tidy_data %>% 
+  mutate_all(~replace(., is.na(.), "")) %>% 
   rename(Value = numeric) %>% 
   mutate(Gas = ifelse(Gas == "Total greenhouse gas emissions", "", Gas),
-         Country = "United Kingdom",
+         `Sector (end-user)` = "",
+         `Sector detail (end-user)` = "",
+         `Sector (source)` = "",
+         `Sector detail (source)` = "",
          `Observation status` = "Undefined",
          `Unit multiplier` = "Units",
          `Unit measure` = units) %>% 
-  select(Year, Country, Gas, 
+  select(Year, Gas, 
+         `Sector (end-user)`, `Sector detail (end-user)`, `Sector (source)`, `Sector detail (source)`,
          `Observation status`,
          `Unit multiplier`, `Unit measure`,
          Value)
+
+rm(info_cells, main_data, source_data, tidy_data, units, years)
