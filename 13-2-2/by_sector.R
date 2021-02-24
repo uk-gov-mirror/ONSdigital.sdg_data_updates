@@ -29,6 +29,7 @@ main_data <- source_data %>%
 transport_subsectors <- c("Aviation", "Road", "Railways", "Shipping", "Other mobile")
 agriculture_subsectors <- c("Enteric fermentation", "Wastes", "Other (agriculture)")
 landuse_subsectors <- c("Forest land", "Cropland", "Grassland", "Wetlands", "Settlements", "Other (LULUCF)")
+
 subsectors <- c(transport_subsectors, agriculture_subsectors, landuse_subsectors)
 
 tidy_data <- main_data %>%
@@ -79,6 +80,7 @@ sector_detail_without_two_word_adendum <- sector_detail_without_adendum %>%
 csv_data <- sector_detail_without_two_word_adendum %>% 
   filter(Sector != "Grand Total") %>% # because this is captured in the headline frgures created in 'by_gas_type.R'
   mutate_all(~replace(., is.na(.), "")) %>% 
+  mutate(`Sector detail` = ifelse(`Sector detail` == Sector, "", `Sector detail`)) %>% 
   rename(Value = numeric) %>% 
   mutate(Gas = "",
          `Observation status` = "Undefined",

@@ -2,6 +2,7 @@
 # Date: 08/01/2021
 # Purpose: To create csv data for indicators 3.2.2, ...
 # Requirements: This script runs the code in the folder stated by indicator <- "indicator_folder_name" below. 
+# Runtime: last run approx. 22 seconds
 
 # install.packages("tidyr", dependencies = TRUE)
 # install.packages("dplyr", dependencies = TRUE)
