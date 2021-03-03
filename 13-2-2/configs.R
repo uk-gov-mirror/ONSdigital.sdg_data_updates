@@ -3,7 +3,7 @@
 
 working_directory <- "H:/Coding_repos/sdg_data_updates"
 
-headline_tab_name <- "Table 1"
+headline_tab_name <- "1.1"
 headline_first_header_row <- 3
 
 by_source_tab_name <- "Table 3"

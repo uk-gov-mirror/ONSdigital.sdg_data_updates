@@ -1,32 +1,3 @@
-#' Count mismatches between numbers
-#'
-#' Counts the number of mismatches between two number vectors of the same length.
-#'
-#' @param number_var_1,number_var_2 Numeric vector.
-#'
-#' @return Number of mismatches.
-#'
-#' @examples
-#' correct_number <- c(1:4)
-#' calculated_number <- c(1:3,5)
-#' count_mismatches(correct_number, calculated_number)
-#'
-#' correct_char <- letters[1:4]
-#' created_char <- c(letters[1:3], "e")
-#' count_mismatches(correct_char, created_char)
-#'
-#' @export
-count_mismatches <- function(number_var_1, number_var_2)  {
-
-  data_frame <- data.frame(var1 = number_var_1, var2 = number_var_2)
-  no_NAs <- na.omit(data_frame)
-  comparison <- ifelse(no_NAs$number_var_1 == no_NAs$number_var_2, 0, 1)
-  mismatch_count <- sum(comparison, na.rm = TRUE)
-  return(mismatch_count)
-
-}
-
-
 #' Count number of decimal places
 #'
 #' Counts the maximum number of decimal places used for a numeric variable as
@@ -112,26 +83,5 @@ count_decimal_places_as_string <- function(value) {
 
   value_as_character <- as.character(value) # print(value, 22) returns a larger number of decimal places but behaves strangely after about 17dp
   nchar(get_characters_after_dot(value_as_character))
-
-}
-
-#' Rates per 1000
-#'
-#' Calculates the rate per 1000, when the numerator is greater than 3.
-#'
-#' @param numerator,denominator,decimal_places Numeric vector.
-#'
-#' @return Numeric vector.
-#'
-#' @examples
-#' calculate_valid_rates_per_1000(13, 11000, 2)
-#' calculate_valid_rates_per_1000(3, 11000, 2)
-#'
-#' @export
-calculate_valid_rates_per_1000 <- function (numerator, denominator, decimal_places) {
-
-  ifelse(numerator > 3,
-         round(numerator / (denominator / 1000), decimal_places),
-         NA)
 
 }
