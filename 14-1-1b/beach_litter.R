@@ -24,14 +24,19 @@ main_data_clean <- original_data %>%
   mutate(Beach.Name = trimws(str_to_title(Beach.Name), which = "both")) %>% 
   select(-c(X, X.1))
 
+duplicate_row_check <- main_data_clean %>% 
+  mutate(duplicate = duplicated(.)) %>% 
+  filter(duplicate == TRUE)
+
 MSFD_beaches_clean <- MSFD_beaches %>% 
   # filter(Subject_to_new_contract == FALSE) %>% 
   mutate(Beach_name = as.character(Beach_name)) %>% 
   mutate(Beach_name = str_to_title(Beach_name))
 
-duplicate_row_check <- main_data_clean %>% 
-  mutate(duplicate = duplicated(.)) %>% 
-  filter(duplicate == TRUE)
+# get beach ID as this is less likely to contain an error than beach name (though no errors found)
+MSFD_beach_IDs <- MSFD_beaches_clean %>% 
+  left_join(main_data_clean, by = c("Beach_name" = "Beach.Name")) %>% 
+  distinct(BeachID, Beach_name)
 
 # beach_name_mismatches <- MSFD_beaches_clean %>% 
 #   left_join(main_data_clean, by = c("Beach_name" = "Beach.Name")) %>% 
@@ -45,10 +50,9 @@ duplicate_row_check <- main_data_clean %>%
 #   distinct(Beach_name, Beach_County, Beach.County, county_matches)
 # # all looks fine
 
-joined_data <- MSFD_beaches_clean %>% 
-  select(Beach_name) %>% 
+joined_data <- MSFD_beach_IDs %>% 
   mutate(MSFD_beach = TRUE) %>% 
-  right_join(main_data_clean, by = c("Beach_name" = "Beach.Name")) %>% 
+  right_join(main_data_clean, by = c("BeachID")) %>% 
   mutate(MSFD_beach = ifelse(is.na(MSFD_beach), FALSE, MSFD_beach)) %>% 
   left_join(GBBC_dates, by = c("Date.of.Survey" = "Date")) %>% 
   mutate(GBBC_date = ifelse(is.na(GBBC_date), FALSE, GBBC_date))
@@ -98,6 +102,66 @@ Comparison <- full_join(MSFD_beaches_identified_by_window, MSFD_beaches_identifi
 #   apply(valid_entries[, first_count_column:last_count_column], 2, function(x) as.numeric(as.character(x)))
 
 #-----------------------------------------------------------------------------------------------
+MSFD_beach_data_to_send_to_Hazel <- joined_data %>% 
+  filter(MSFD_beach == TRUE)
+
+write.csv(MSFD_beach_data_to_send_to_Hazel, "data_for _MSFD_beaches_all_years.csv", row.names = FALSE)
+
+# clean data to replicate MSFD reporting
+MSFD_data_including_replicates <- joined_data %>% 
+  filter(MSFD_beach == TRUE & Year >= 2008) 
+
+# # see if there is a standard date each year for the MSFD counts. Ans: NO
+# date_counts <- MSFD_data_including_replicates %>% 
+#   group_by(Survey.Window, Date.of.Survey) %>% 
+#   summarise(count_of_date = n())
+
+MSFD_data_count_replicates <- MSFD_data_including_replicates %>% 
+  mutate(Survey.Window = ifelse(Survey.Window == "GBBC", paste("Autumn", Year, "GBBC"), as.character(Survey.Window))) %>% 
+  group_by(Beach_name, Survey.Window) %>% 
+  summarise(count_during_window = n()) %>% 
+  filter(count_during_window > 1) %>% 
+  left_join(MSFD_data_including_replicates) %>% 
+  select(Beach_name, OrganiserID, Survey.Window, Date.of.Survey, Date.beach.was.last.cleaned, Length.Surveyed..metres., Total.survey.time..hours.)
+
+# Take the first date when there is a replicate, except:
+# Crammond Spring 2016: use 23/04/2016 as the first is a different organiser
+# 
+
+unique(MSFD_data$Length.Surveyed..metres.)
+
+# get the ID of the person who most often submits records
+modal_organiser <- MSFD_data_count_replicates %>% 
+  group_by(BeachID) %>% 
+  summarise(usual_organiser = get_modal_values(OrganiserID),
+            count_of_cleans_all_organisers = n())
+
+
+
+# plot each beach by year so it is easier to see where surveys were missed, and
+# whether there were surveys done by different people
+Beach_names <- unique(MSFD_data_including_replicates$Beach_name)
+
+for (i in 1:length(Beach_names)) {
+
+  plot_by_beach <- MSFD_data_including_replicates %>%
+    filter(Beach_name == Beach_names[i]) %>%
+    arrange(desc(OrganiserID)) %>% 
+    mutate(OrganiserID = as.character(OrganiserID)) %>% 
+    ggplot(data = .,
+           aes(x = Survey.Window,
+               y = OrganiserID,
+               fill = as.character(OrganiserID))) +
+    geom_col(position="dodge", stat="identity") +
+    facet_wrap(vars(Year), nrow = 5) +
+    theme_bw() +
+    ggtitle(Beach_names[i]) +
+    theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+  print(plot_by_beach)
+
+}
+
 # --- create clean data sets for analysis ----
 
 valid_entries_for_effort_correction <- joined_data %>% 
