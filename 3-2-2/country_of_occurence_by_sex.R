@@ -1,7 +1,7 @@
 # Author: Emma Wood
 # Date (start): 29/01/2021
 # Purpose: To create csv data for country of occurrence: baby sex disaggregations for indicator 3.2.2
-# Requirements:This script is called by compile_tables.R, which is called by main.R
+# Requirements:This script is called by compile_tables.R, which is called by update_indicator_main.R
 
 country_of_occurrence_by_sex_tab_name <- ask_user_for_tab_name("country of occurrence by sex", country_of_occurrence_by_sex_tab_name)
 first_header_row <- ask_user_for_first_header_row(country_of_occurrence_by_sex_tab_name, first_header_row_country_by_sex)

@@ -1,13 +1,15 @@
 # Author: Emma Wood
 # Date (start): 01/02/2021
-# Purpose: To create csv data for area of residence (region) 3.2.2. (look into also giving local authority numbers - not rates as they are unreliable)
-# Requirements:This script is called by compile_tables.R, which is called by main.R
+# Purpose: To create csv data for area of residence (region) 3.2.2. 
+# TO DO: look into also giving local authority numbers (We shouldn't display rates as they are unreliable)
+# Requirements:This script is called by compile_tables.R, which is called by update_indicator_main.R
 
 area_of_residence_tab_name <- ask_user_for_tab_name("area of residence (region)", area_of_residence_tab_name)
 first_header_row <- ask_user_for_first_header_row(area_of_residence_tab_name, first_header_row_area_of_residence)
 
 source_data <- xlsx_cells(paste0("Input/", filename), sheets = area_of_residence_tab_name)
 
+# info cells are the cells above the column headings
 info_cells <- get_info_cells(source_data, first_header_row_area_of_residence)
 year <-unique_to_string(info_cells$Year)
 country <- unique_to_string(info_cells$Country)
@@ -35,7 +37,7 @@ if ("Region" %in% main_data$character){ # because headings are different for 201
   only_regions_kept <- clean_data %>% 
     filter(geography == "Region")
   
-} else {
+} else { # for data that don't have Region as a geography, England regions and Welsh health boards are in the same column
   
   tidy_data <- main_data %>%
     behead("left-up", GeoCode) %>%
@@ -80,6 +82,7 @@ clean_csv_data_area_of_residence <- only_regions_kept %>%
 multiple_year_warning(filename, area_of_residence_tab_name,"area of residence (region)")
 multiple_country_warning(filename, area_of_residence_tab_name,"area of residence (region)")
 
+# clean up environment as the same names are used for multiple scripts called in the same session
 rm(clean_data, main_data,
    only_regions_kept, 
    info_cells, source_data,
