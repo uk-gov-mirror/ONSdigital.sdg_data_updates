@@ -1,7 +1,7 @@
 # Author: Emma Wood
 # Date (start): 26/01/2021
-# Purpose: To create csv data for birthweight: mother age disaggregations for indicator 3.2.2
-# Requirements: This script is called by compile_tables.R, which is called by main.R
+# Purpose: To create csv data for birthweight by mother age disaggregation for indicator 3.2.2
+# Requirements: This script is called by compile_tables.R, which is called by update_indicator_main.R
 
 birthweight_by_mum_age_tab_name <- ask_user_for_tab_name("birthweight by mum age", birthweight_by_mum_age_tab_name)
 first_header_row <- ask_user_for_first_header_row(birthweight_by_mum_age_tab_name, first_header_row_birthweight_by_mum_age)
@@ -100,6 +100,7 @@ if(number_of_rate_calculation_mismatches != 0){
                 "Calculations are performed in the block of code where 'late_neonatal' is created."))
 }
 
+# clean up environment as the same names are used for multiple scripts called in the same session
 rm(clean_data, main_data,
    data_for_calculations, data_in_csv_format,
    info_cells, late_neonatal, source_data,
