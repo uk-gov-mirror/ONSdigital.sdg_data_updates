@@ -6,6 +6,13 @@ library(tidyr)
 library(dplyr) 
 
 
+check_for_caseno_repeats <- function(dat) {
+  dat %>%
+    group_by(caseno) %>%
+    summarise(caseno_count = n()) %>%
+    filter(caseno_count > 1)
+}
+
 # replace drive with relevant letter for your computer
 filepath <- "Z:\\APS Databases\\2018 Reweighted Files\\"
 APS_2020 <- "2020\\APSP_J19J20_CLIENT_PWTA18\\APSP_J19J20_CLIENT_PWTA18.sav"
@@ -21,71 +28,58 @@ APS_2012 <- "2012\\APSP_JAN12_DEC12_CLIENT_PWTA18\\APSP_JAN12_DEC12_CLIENT_PWTA1
 APS_data <- paste0(filepath, APS_2020) 
 APS_data <- read_sav(APS_data)
 
-
-unpaid_family_workers_INECAC05 <- APS_data %>% 
+employed <- APS_data %>% 
   select(INECAC05, INDS07M, SEX, PWTA18, caseno) %>% 
-  filter(INECAC05 == 4)
+  rename(industry = INDS07M,
+         employment_status = INECAC05,
+         weight = PWTA18) %>% 
+  mutate(sector = ifelse(industry == 1, "Agriculture", "Non-Agriculture")) %>% 
+  filter(!is.na(sector)) %>%  # removes anyone without an industry e.g. inactive people
+  filter(employment_status %in% c(1:4)) # 1 = employed, 2 = self employed, 3 = Government schemes, 4 = unpaid family workers
 
-total_employed <- APS_data %>% 
-  select(INECAC05, INDS07M, SEX, PWTA18, caseno) %>% 
-  filter(INECAC05 == 1 | INECAC05 == 2)
+unpaid_family_workers  <- employed %>% 
+  filter(employment_status  == 4) # 4 refers to unpaid family workers
 
-
-check_for_caseno_repeats <- function(dat) {
-  dat %>%
-    group_by(caseno) %>%
-    summarise(caseno_count = n()) %>%
-    filter(caseno_count > 1)
-}
 
 repeat_check_employed <- check_for_caseno_repeats(total_employed)
-repeat_check_unpaid <- check_for_caseno_repeats(unpaid_family_workers_INECAC05)
+repeat_check_unpaid <- check_for_caseno_repeats(unpaid_family_workers )
 
 if (nrow(repeat_check_employed) > 0| nrow(repeat_check_unpaid)>0) {
   stop("There are repeated cases in one or both of these dataset, please investigate")
 }
 
+# get denominators
 
-number_no_sector <- unpaid_family_workers_INECAC05 %>% 
-  filter(is.na(INDS07M)) %>% 
-  nrow(.)
 
-Sector_added <- unpaid_family_workers_INECAC05 %>% 
-  mutate(sector = ifelse(INDS07M == 1, "Agriculture", "Non-Agriculture")) %>% 
-  filter(!is.na(sector))
-
-sex_count <- Sector_added %>% 
-  group_by(sector, SEX) %>% 
-  summarise(sex_count = n())
-
-min_count_sex_by_sector <- min(sex_count$sex_count)
-
-sector_count <- Sector_added %>% 
+total_employment_by_sector <- employed %>% 
   group_by(sector) %>% 
-  summarise(sector_count = n())
+  summarise(Total_employment = sum(weight))
 
-min_count_sector <- min(sector_count$sector_count)
-
-
-
-weights_by_sector <- Sector_added %>% 
-  group_by(sector) %>% 
-  summarise(unpaid_weights_sum = sum(PWTA18))
-
-# calculating total number of people in agriculture - 'Total employment in agriculture'
-
-agriculture_non_agriculture_df <- APS_data %>%
-  select(INECAC05, INDS07M, SEX, PWTA18, caseno) %>%
-  mutate(sector = ifelse(INDS07M == 1, "Agriculture", "Non-Agriculture")) %>% 
-  filter(!is.na(sector))
-
-total_agriculture_non_agriculture_weights_with_sex <- agriculture_non_agriculture_df %>%
+total_employment_by_sector_by_sex <- employed %>% # change to employed
   group_by(sector, SEX) %>% 
-  summarise(Total_employment_in_sector_weights = sum(PWTA18))
+  summarise(Total_employment = sum(weight))
 
-proportion_of_informal_employment <- total_agriculture_non_agriculture_weights_with_sex %>% 
-  left_join(weights_by_sector_sex, by = c("SEX", "sector")) %>%
-  mutate(proprtion_of_informal_employment = (unpaid_weights_sum/Total_employment_in_sector_weights)*100, 
+denominators <- bind_rows(total_employment_by_sector, total_employment_by_sector_by_sex)
+
+
+# get numerators
+informal_employment_by_sector <- unpaid_family_workers %>% 
+  group_by(sector) %>% 
+  summarise(informal_employment = sum(weight))
+
+informal_employment_by_sector_sex <- unpaid_family_workers %>% 
+  group_by(sector, SEX) %>% 
+  summarise(informal_employment = sum(weight))
+
+numerators <- bind_rows(informal_employment_by_sector, informal_employment_by_sector_sex)
+
+# calculating total number of people in agriculture - 'Total employment in agriculture' - by male and Female
+
+
+
+proportion_of_informal_employment <- numerators %>% 
+  left_join(denominators, by = c("SEX", "sector")) %>%
+  mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100, 
          Sex = case_when(
            SEX == 1 ~ "Male",
            SEX == 2 ~ "Female",
@@ -94,26 +88,21 @@ proportion_of_informal_employment <- total_agriculture_non_agriculture_weights_w
   
 headline <- proportion_of_informal_employment %>% 
   group_by(sector) %>% 
-  summarise(Total_employment_in_sector_weights = sum(Total_employment_in_sector_weights),
-             unpaid_weights_sum = sum(unpaid_weights_sum)) %>% 
-  mutate(proprtion_of_informal_employment = (unpaid_weights_sum/Total_employment_in_sector_weights)*100)
+  summarise(Total_employment = sum(Total_employment),
+             informal_employment = sum(informal_employment)) %>% 
+  mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100)
   
 # CSV_2 holds 'Proportion of informal employment in agriculture' AND 'Proportion of informal employment in non agricultural employment'
    
 CSV_2 <- bind_rows(headline, proportion_of_informal_employment)
 
-  
-
-weights_by_sector_sex <- Sector_added %>% 
-  group_by(sector, SEX) %>% 
-  summarise(unpaid_weights_sum = sum(PWTA18))
 
 
-total_employed_weights_sum<- sum(total_employed$PWTA18)
+total_employed_weights_sum<- sum(total_employed$weight)
 
 total_employed_weights_by_sex <- total_employed %>% 
   group_by(SEX) %>% 
-  summarise(employed_weights_sum = sum(PWTA18))
+  summarise(employed_weights_sum = sum(weight))
 
 
 
@@ -129,4 +118,20 @@ csv_data <- bind_rows(weights_by_sector, weights_by_sector_sex) %>%
            is.na(SEX) ~ "")) %>%
     select(-c(SEX, unpaid_weights_sum, employed_weights_sum))
   
+
+
+####Checks
+
+sex_count <- employed %>% 
+  group_by(sector, SEX) %>% 
+  summarise(sex_count = n())
+
+min_count_sex_by_sector <- min(sex_count$sex_count)
+
+sector_count <- employed %>% 
+  group_by(sector) %>% 
+  summarise(sector_count = n())
+
+min_count_sector <- min(sector_count$sector_count)
+
   
