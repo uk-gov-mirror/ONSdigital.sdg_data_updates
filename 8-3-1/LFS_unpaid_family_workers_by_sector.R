@@ -1,11 +1,17 @@
 # Purpose: Get data for the urban/ rural by sex and the the urban/ rural disaggregations from the LFS dataset
 # Requires: Access to the LFS_SPSS drive
+# Authors: Emmma Wood, Varun Jakki
+# About this code: This code creates a CSV forindicator 8.3.1 - The calculations completed are: 
+# Proportion of informal employment in total employment = (Informal employment/Total employment) × 100
+# Proportion of informal employment in agriculture = (Informal employment in agricultural activities/Total employment in agriculture) × 100
+# Proportion of informal employment in non agricultural employment = (Informal employment in non agricultural activities/Total employment in non agricultural activities) × 100
 
+# Code last updated: 19/03/2021
 library(haven)
 library(tidyr)
 library(dplyr) 
 
-
+###############
 check_for_caseno_repeats <- function(dat) {
   dat %>%
     group_by(caseno) %>%
@@ -13,20 +19,18 @@ check_for_caseno_repeats <- function(dat) {
     filter(caseno_count > 1)
 }
 
-# replace drive with relevant letter for your computer
-filepath <- "Z:\\APS Databases\\2018 Reweighted Files\\"
-APS_2020 <- "2020\\APSP_J19J20_CLIENT_PWTA18\\APSP_J19J20_CLIENT_PWTA18.sav"
-APS_2019 <- "2019\\APSP_Jan_Dec2019_PWT18\\APSP_Jan_Dec2019_PWT18.sav"
-APS_2018 <- "2018\\APSP_JAN18_DEC18_CLIENT_PWTA18\\APSP_JAN18_DEC18_CLIENT_PWTA18.sav"
-APS_2017 <-  "2017\\APSP_JAN17_DEC17_CLIENT_PWTA18\\APSP_JAN17_DEC17_CLIENT_PWTA18.sav"
-APS_2016 <-  "2016\\APSP_JAN16_DEC16_CLIENT_PWTA18\\APSP_JAN16_DEC16_CLIENT_PWTA18.sav"
-APS_2015 <-  "2015\\APSP_JAN15_DEC15_CLIENT_PWTA18\\APSP_JAN15_DEC15_CLIENT_PWTA18.sav"
-APS_2014 <-  "2014\\APSP_JAN14_DEC14_CLIENT_PWTA18\\APSP_JAN14_DEC14_CLIENT_PWTA18.sav"
-APS_2013 <- "2013\\APSP_JAN13_DEC13_CLIENT_PWTA18\\APSP_JAN13_DEC13_CLIENT_PWTA18.sav"
-APS_2012 <- "2012\\APSP_JAN12_DEC12_CLIENT_PWTA18\\APSP_JAN12_DEC12_CLIENT_PWTA18.sav"
 
-APS_data <- paste0(filepath, APS_2020) 
-APS_data <- read_sav(APS_data)
+min_count_check <- function(group_var){
+  
+  counts <- unpaid_family_workers %>% 
+    group_by(across(all_of(group_var))) %>% 
+    summarise(count = n())
+  
+  min(counts$count)
+}
+##########
+
+APS_data <- read_sav(paste0(filepath, year_filepath))
 
 employed <- APS_data %>% 
   select(INECAC05, INDS07M, SEX, PWTA18, caseno) %>% 
@@ -40,17 +44,7 @@ employed <- APS_data %>%
 unpaid_family_workers  <- employed %>% 
   filter(employment_status  == 4) # 4 refers to unpaid family workers
 
-
-repeat_check_employed <- check_for_caseno_repeats(total_employed)
-repeat_check_unpaid <- check_for_caseno_repeats(unpaid_family_workers )
-
-if (nrow(repeat_check_employed) > 0| nrow(repeat_check_unpaid)>0) {
-  stop("There are repeated cases in one or both of these dataset, please investigate")
-}
-
 # get denominators
-
-
 total_employment_by_sector <- employed %>% 
   group_by(sector) %>% 
   summarise(Total_employment = sum(weight))
@@ -79,31 +73,49 @@ numerators <- bind_rows(informal_employment_by_sector, informal_employment_by_se
 
 proportion_of_informal_employment <- numerators %>% 
   left_join(denominators, by = c("SEX", "sector")) %>%
-  mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100, 
-         Sex = case_when(
-           SEX == 1 ~ "Male",
-           SEX == 2 ~ "Female",
-           is.na(SEX) ~ ""))
-  
+  mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100)
   
 headline <- proportion_of_informal_employment %>% 
-  group_by(sector) %>% 
+  group_by(SEX) %>% 
   summarise(Total_employment = sum(Total_employment),
-             informal_employment = sum(informal_employment)) %>% 
+            informal_employment = sum(informal_employment)) %>% 
   mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100)
   
 # CSV_2 holds 'Proportion of informal employment in agriculture' AND 'Proportion of informal employment in non agricultural employment'
    
-CSV_2 <- bind_rows(headline, proportion_of_informal_employment)
+all_data <- bind_rows(headline, proportion_of_informal_employment )
 
 
+min_count_sector <- min_count_check("sector")
+min_count_sex <- min_count_check("SEX")
+min_count_sex_by_sector <- min_count_check(c("SEX", "sector"))
 
-total_employed_weights_sum<- sum(total_employed$weight)
 
-total_employed_weights_by_sex <- total_employed %>% 
-  group_by(SEX) %>% 
-  summarise(employed_weights_sum = sum(weight))
+quality_control <- all_data %>% 
+  mutate(low_reliability = case_when(
+    min_count_sector <= 25 & !is.na(sector) & is.na(SEX) ~ TRUE,
+    min_count_sex <= 25 & is.na(sector) & !is.na(SEX) ~ TRUE,
+    min_count_sex_by_sector <= 25 & !is.na(sector) & !is.na(SEX) ~ TRUE,
+    TRUE ~ FALSE)) %>%  # In a case_when this final "TRUE" translates as "all other cases"
+  filter(low_reliability == FALSE) %>% 
+  select(-low_reliability)
 
+
+csv <- quality_control %>%
+  mutate(`Unit measure` = "Percentage (%)",
+         `Unit multiplier`= "Units",
+         `Observation status`= "Undefined",
+         Year = substr(year_filepath, 1, 4),
+         Region = "",
+         GeoCode = "",
+         sector = ifelse(is.na(sector), "", sector),
+         Sex = case_when(
+           SEX == 1 ~ "Male",
+           SEX == 2 ~ "Female",
+           is.na(SEX) ~ "")) %>% 
+  rename(Sector = sector,
+         Value = proprtion_of_informal_employment) %>% 
+  select(Year, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value) 
 
 
 # Calculation for 'Proportion of informal employment in total employment'
@@ -122,16 +134,10 @@ csv_data <- bind_rows(weights_by_sector, weights_by_sector_sex) %>%
 
 ####Checks
 
-sex_count <- employed %>% 
-  group_by(sector, SEX) %>% 
-  summarise(sex_count = n())
+min_count_sector <- min_count_check("sector")
+min_count_sex_by_sector <- min_count_check(c("SEX", "sector"))
+min_count_sex <- min_count_check("SEX")
 
-min_count_sex_by_sector <- min(sex_count$sex_count)
 
-sector_count <- employed %>% 
-  group_by(sector) %>% 
-  summarise(sector_count = n())
-
-min_count_sector <- min(sector_count$sector_count)
-
-  
+repeat_check_employed <- check_for_caseno_repeats(employed)
+repeat_check_unpaid <- check_for_caseno_repeats(unpaid_family_workers)
