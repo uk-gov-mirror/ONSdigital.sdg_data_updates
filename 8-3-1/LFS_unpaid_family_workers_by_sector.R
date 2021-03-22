@@ -1,12 +1,16 @@
-# Purpose: Get data for the urban/ rural by sex and the the urban/ rural disaggregations from the LFS dataset
-# Requires: Access to the LFS_SPSS drive
 # Authors: Emmma Wood, Varun Jakki
-# About this code: This code creates a CSV forindicator 8.3.1 - The calculations completed are: 
+# Purpose: Get data from the APS dataset for the following disaggregations:
+#             sex, sector (agriculture/non-agriculture), and sector by sex 
+# Requires: Access to the LFS_SPSS drive.
+#           This file is called by compile_tables.R, and requires config.R 
+
+# About this code: This code creates a CSV for indicator 8.3.1 - The calculations completed are: 
 # Proportion of informal employment in total employment = (Informal employment/Total employment) × 100
 # Proportion of informal employment in agriculture = (Informal employment in agricultural activities/Total employment in agriculture) × 100
 # Proportion of informal employment in non agricultural employment = (Informal employment in non agricultural activities/Total employment in non agricultural activities) × 100
 
-# Code last updated: 19/03/2021
+# Code last updated: 22/03/2021
+
 library(haven)
 library(tidyr)
 library(dplyr) 
@@ -28,6 +32,17 @@ min_count_check <- function(group_var){
   
   min(counts$count)
 }
+
+sum_weights <- function(dat, group_var, new_col) {
+  
+  new_col <- enquo(new_col)
+  new_col_name <- quo_name(new_col)
+  
+  dat %>% 
+    group_by(across(all_of(group_var))) %>% 
+    summarise(!!new_col_name := sum(weight))
+}
+
 ##########
 
 APS_data <- read_sav(paste0(filepath, year_filepath))
@@ -45,32 +60,16 @@ unpaid_family_workers  <- employed %>%
   filter(employment_status  == 4) # 4 refers to unpaid family workers
 
 # get denominators
-total_employment_by_sector <- employed %>% 
-  group_by(sector) %>% 
-  summarise(Total_employment = sum(weight))
-
-total_employment_by_sector_by_sex <- employed %>% # change to employed
-  group_by(sector, SEX) %>% 
-  summarise(Total_employment = sum(weight))
-
+total_employment_by_sector <- sum_weights(employed, "sector", Total_employment)
+total_employment_by_sector_by_sex <- sum_weights(employed, c("sector", "SEX"), Total_employment)
 denominators <- bind_rows(total_employment_by_sector, total_employment_by_sector_by_sex)
 
-
 # get numerators
-informal_employment_by_sector <- unpaid_family_workers %>% 
-  group_by(sector) %>% 
-  summarise(informal_employment = sum(weight))
-
-informal_employment_by_sector_sex <- unpaid_family_workers %>% 
-  group_by(sector, SEX) %>% 
-  summarise(informal_employment = sum(weight))
-
+informal_employment_by_sector <- sum_weights(unpaid_family_workers, "sector", informal_employment)
+informal_employment_by_sector_sex <- sum_weights(unpaid_family_workers, c("sector", "SEX"), informal_employment) 
 numerators <- bind_rows(informal_employment_by_sector, informal_employment_by_sector_sex)
 
-# calculating total number of people in agriculture - 'Total employment in agriculture' - by male and Female
-
-
-
+# calculate total number of people in agriculture - 'Total employment in agriculture' - by male and Female
 proportion_of_informal_employment <- numerators %>% 
   left_join(denominators, by = c("SEX", "sector")) %>%
   mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100)
@@ -81,9 +80,7 @@ headline <- proportion_of_informal_employment %>%
             informal_employment = sum(informal_employment)) %>% 
   mutate(proprtion_of_informal_employment = (informal_employment/Total_employment)*100)
   
-# CSV_2 holds 'Proportion of informal employment in agriculture' AND 'Proportion of informal employment in non agricultural employment'
-   
-all_data <- bind_rows(headline, proportion_of_informal_employment )
+all_data <- bind_rows(headline, proportion_of_informal_employment)
 
 
 min_count_sector <- min_count_check("sector")
@@ -99,7 +96,6 @@ quality_control <- all_data %>%
     TRUE ~ FALSE)) %>%  # In a case_when this final "TRUE" translates as "all other cases"
   filter(low_reliability == FALSE) %>% 
   select(-low_reliability)
-
 
 csv <- quality_control %>%
   mutate(`Unit measure` = "Percentage (%)",
@@ -117,27 +113,6 @@ csv <- quality_control %>%
          Value = proprtion_of_informal_employment) %>% 
   select(Year, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value) 
 
-
-# Calculation for 'Proportion of informal employment in total employment'
-
-csv_data <- bind_rows(weights_by_sector, weights_by_sector_sex) %>%
-  left_join(total_employed_weights_by_sex, by = "SEX") %>% 
-  mutate(employed_weights_sum = ifelse(is.na(SEX), total_employed_weights_sum, employed_weights_sum)) %>% 
-  mutate(Value = (unpaid_weights_sum/employed_weights_sum)*100, 
-         Sex = case_when(
-           SEX == 1 ~ "Male",
-           SEX == 2 ~ "Female",
-           is.na(SEX) ~ "")) %>%
-    select(-c(SEX, unpaid_weights_sum, employed_weights_sum))
-  
-
-
-####Checks
-
-min_count_sector <- min_count_check("sector")
-min_count_sex_by_sector <- min_count_check(c("SEX", "sector"))
-min_count_sex <- min_count_check("SEX")
-
-
+#### Checks
 repeat_check_employed <- check_for_caseno_repeats(employed)
 repeat_check_unpaid <- check_for_caseno_repeats(unpaid_family_workers)
