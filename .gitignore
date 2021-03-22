@@ -38,6 +38,16 @@ vignettes/*.pdf
 # R Environment Variables
 .Renviron
 
-# input and output files
+# input and output folders
 **/Input
 **/Output
+**/INPUT
+**/OUTPUT
+**/input
+**/output
+
+# config files
+config.R
+configs.R
+Config.R
+Configs.R
