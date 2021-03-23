@@ -1,7 +1,5 @@
 Author: Emma Wood
 
-Date: 08/01/2021
-
 Create csv data for 3-2-2 with the following disaggregations:
 - birthweight by mother age
 - country of occurrence by sex of baby
