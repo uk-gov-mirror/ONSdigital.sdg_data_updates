@@ -8,7 +8,7 @@ Create csv data for 3-2-2 with the following disaggregations:
 Input data are stored in a folder named 'Input' (See 'Example Input'). Outputs are saved to a folder named 'Output'. 
 
         
-USER INSTRUCTIONS (SDG Data team): 
+### USER INSTRUCTIONS (SDG Data team): 
 
 1) Save 'Child mortality (death cohort) tables in England and Wales' as an xlsx file in Jemalex/code for updates/3.2.2/Input. 
 2) Open update_indicator_main.R from RStudio
@@ -21,10 +21,10 @@ Note: If this is the first time you have run the script you may need to install 
 
 Please check the data source to see if the best data are being reported, or if there are other series we sohould include
 
-QA PROCESS (SDG Data team):
+### QA PROCESS (SDG Data team):
 ...
 
-TROUBLESHOOTING:
+### TROUBLESHOOTING:
 If you get the error:
 Error in setwd(paste0("H:/Coding_repos/sdg_data_updates/", indicator)) : 
   cannot change working directory
@@ -35,7 +35,7 @@ Error in file(file, ifelse(append, "a", "w")) :
   cannot open the connection
 -This is probably becaue you already have a version of that output file open. Close the file and try again.
 
-DEVELOPER NOTES:
+### NOTES:
 compile_tables.R: called by update_indicator_main.R
 
 compile_tables.R: asks the user to choose a file from the Input folder, 
