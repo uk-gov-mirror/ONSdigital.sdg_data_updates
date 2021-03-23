@@ -22,7 +22,7 @@ GBBC_dates <- read.csv("Input/GBBC_dates.csv") %>%
 main_data_clean <- original_data %>% 
   mutate(Beach.Name = as.character(Beach.Name)) %>% 
   mutate(Beach.Name = trimws(str_to_title(Beach.Name), which = "both")) %>% 
-  select(-c(X, X.1))
+  select(-c(X, X.1)) 
 
 duplicate_row_check <- main_data_clean %>% 
   mutate(duplicate = duplicated(.)) %>% 
@@ -171,6 +171,20 @@ valid_entries_for_effort_correction <- joined_data %>%
 
 # remove duplicates
 #  as.character(Date.of.Survey) != as.character(Date.beach.was.last.cleaned)
+
+
+Nelms <- valid_entries_for_effort_correction %>% 
+  filter(Year >= 2005 & Year <= 2014 & Beach.Region != "Channel Islands" &
+         Beach.Region != "Channel Islands" & 
+           Beach.Region != "Northern Ireland" & Beach.Region != "Republic of Ireland") %>% 
+  distinct(BeachID)
+beaches_every_year <- Nelms %>% 
+  distinct(BeachID, Year) %>% 
+  group_by(BeachID) %>% 
+  summarise(Number_of_years = n()) %>% 
+  filter(Number_of_years >= 3) 
+  
+  left_join()
 
 
 # beach 2612 on 17/09/2017 I think the counts need to be added together (looks like they just forgot 0.5 of a bag and added it as a whole new entry)

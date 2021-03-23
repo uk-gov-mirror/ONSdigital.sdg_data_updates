@@ -9,8 +9,8 @@
 #' NA. If NA is the modal value a default value is returned and a warning is
 #' given.
 #'
-#' The mode is used to remove unusual counts, and therefore get
-#' the value most likely to be correct.
+#' The mode is used to remove unusual counts, and therefore get the value most
+#' likely to be correct.
 #'
 #' count_decimal_places_numerically counts the number of decimal places used for
 #' a numeric variable. This should be used with caution as 'R stores numbers
@@ -25,7 +25,10 @@
 #' that are known to be incorrect are returned as NA (e.g 1.23e+20 would return
 #' NA)
 #'
-#' @seealso thread: https://stat.ethz.ch/pipermail/r-help/2012-July/317676.html
+#' @seealso Thread on counting decimal places:
+#'   https://stat.ethz.ch/pipermail/r-help/2012-July/317676.html Rationale for
+#'   setting default number of decimal places to 3:
+#'   https://www.bmj.com/content/350/bmj.h1845
 #'
 #' @importFrom dplyr %>%
 #' @importFrom dplyr mutate
@@ -33,7 +36,7 @@
 #'
 #' @param value Numeric vector.
 #' @param default The default number to be returned if the count is
-#'   unsuccessful. Optional (defaults to 20).
+#'   unsuccessful. Optional (defaults to 3).
 #'
 #' @return Numeric vector.
 #'
@@ -60,7 +63,7 @@
 #' count_decimal_places_as_string(test_dat5) # returns 18 because of conversion to 1.234568e+18
 #'
 #' @export
-count_decimal_places <- function (value, default = 20) {
+count_decimal_places <- function (value, default = 3) {
 
   no_NAs <- na.omit(value)
 
@@ -68,25 +71,33 @@ count_decimal_places <- function (value, default = 20) {
   numeric_count <- count_decimal_places_numerically(no_NAs)
 
   quality_adjusted <- data.frame(character_count = character_count, numeric_count = numeric_count) %>%
-    mutate(numeric_count = ifelse(is.na(character_count), NA, numeric_count),
-           methods_match = ifelse(numeric_count == character_count, TRUE, FALSE)) %>%
+    mutate(methods_match = ifelse(numeric_count == character_count, TRUE, FALSE),
+           numeric_count = ifelse(is.na(character_count), NA, numeric_count)) %>%
     mutate(reliable = ifelse(methods_match == TRUE &
                                !is.na(character_count) & !is.na(numeric_count), TRUE, FALSE))
 
-  most_common_counts <- get_modal_values(c(quality_adjusted$numeric_count, quality_adjusted$character_count))
+  non_NA_counts <- filter(quality_adjusted, !is.na(numeric_count) & !is.na(character_count))
 
-  max_count <- max(most_common_counts)
+  non_NA_most_common_counts <- get_modal_values(c(non_NA_counts$numeric_count, non_NA_counts$character_count))
 
-  methods_always_match <- ifelse(length(no_NAs) ==  sum(quality_adjusted$methods_match), TRUE, FALSE)
+  if (is.logical(non_NA_most_common_counts) == FALSE) {
+    max_count <- max(non_NA_most_common_counts)
+  } else {
+    max_count <- NA
+  }
+
+  methods_always_match <- ifelse(length(no_NAs) ==  sum(quality_adjusted$methods_match, na.rm = TRUE),
+                                 TRUE, FALSE)
   suspect_counts_exist <- ifelse(sum(is.na(quality_adjusted) > 0), TRUE, FALSE)
   number_of_reliable_counts <- sum(quality_adjusted$reliable)
+  fifty_percent_of_counts <- 0.5 * length(no_NAs)
 
 
-  if (is.na(max_count)) {
+  if (is.na(max_count) == TRUE) {
     warning("Unable to count decimal places, please check returned number of decimal places is acceptable and manually adjust if not.")
     max_count <- default
   } else if ((suspect_counts_exist == TRUE | methods_always_match == FALSE) &
-             number_of_reliable_counts <=5 ) {
+             number_of_reliable_counts <= fifty_percent_of_counts ) {
     warning(paste0("Result based on small number of reliable counts (reliable counts = ", number_of_reliable_counts, ")" ))
   }
 
@@ -123,7 +134,7 @@ count_decimal_places_as_string <- function(value) {
 
   for (i in 1:length(value)){
 
-    if (!is.numeric(value) == TRUE) { stop("value must be numeric") }
+    if (!is.numeric(value[i]) == TRUE) { stop("value must be numeric") }
 
     if (grepl("e+", value[i]) == TRUE) { value[i] <- NA } # this prevents an incorrect count due to very large numbers being read in scientific format e.g. 1.234567890123456e+20
 
