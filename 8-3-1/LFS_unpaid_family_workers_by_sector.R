@@ -1,3 +1,4 @@
+
 # Authors: Emmma Wood, Varun Jakki
 # Purpose: Get data from the APS dataset for the following disaggregations:
 #             sex, sector (agriculture/non-agriculture), and sector by sex 
@@ -5,15 +6,17 @@
 #           This file is called by compile_tables.R, and requires config.R 
 
 # About this code: This code creates a CSV for indicator 8.3.1 - The calculations completed are: 
-# Proportion of informal employment in total employment = (Informal employment/Total employment) × 100
-# Proportion of informal employment in agriculture = (Informal employment in agricultural activities/Total employment in agriculture) × 100
-# Proportion of informal employment in non agricultural employment = (Informal employment in non agricultural activities/Total employment in non agricultural activities) × 100
+# Proportion of informal employment in total employment = (Informal employment/Total employment) Ã— 100
+# Proportion of informal employment in agriculture = (Informal employment in agricultural activities/Total employment in agriculture) Ã— 100
+# Proportion of informal employment in non agricultural employment = (Informal employment in non agricultural activities/Total employment in non agricultural activities) Ã— 100
 
 # Code last updated: 22/03/2021
+
 
 library(haven)
 library(tidyr)
 library(dplyr) 
+
 
 ###############
 check_for_caseno_repeats <- function(dat) {
@@ -211,9 +214,5 @@ suppressed_data <- quality_control %>%
   mutate(Year = substr(year_filepath, 1, 4)) %>% 
   select_if(not_all_na) %>% 
   select(-`Number of respondents`)
-
-  
-
-
 
 

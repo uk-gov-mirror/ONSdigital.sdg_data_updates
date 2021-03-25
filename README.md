@@ -15,3 +15,4 @@ Use update_indicator_main.R to run all indicator update scripts.
 Indicator specific files can be found in each indicator folder (name structure num-num-num)
 
 SDGupdater is a package used by indicator update scripts. Code for installing this is commented out in update_indicator_main.R
+
