@@ -24,13 +24,12 @@ library(SDGupdater)
 
 #----------------------------------------------------------------------------------------------
 
-indicator <- "13-2-2" # name of folder for indicator
+indicator <- "8-3-1" # name of folder for indicator
 
-start <- Sys.time()
 setwd(paste0("H:/Coding_repos/sdg_data_updates/", indicator))
-source("compile_tables.R")
-end <- Sys.time()
 
-end-start
+source("compile_tables.R")
+
+
 
 

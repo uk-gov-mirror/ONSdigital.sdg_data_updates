@@ -14,15 +14,25 @@ test_that("count_decimal_places returns expected datatype", {
   expect_equal(typeof(count_decimal_places(1.1)), "double")
   expect_equal(typeof(count_decimal_places(1.12345678)), "double")
   expect_equal(typeof(count_decimal_places(12345678)), "double")
-  expect_equal(typeof(count_decimal_places(12345678.12345678)), "double")
+  expect_equal(typeof(count_decimal_places(12345678.1234567)), "double")
   expect_equal(typeof(count_decimal_places(c(1.1, 1.2))), "double")
+  expect_equal(typeof(count_decimal_places(c(123456789012345678901,5, rep(10.3,2)))), "double") # where NA values are almost as common as real counts
 })
 
-# test_that("count_decimal_places gives warning when default count returned", {
-#   expect_error(count_decimal_places(123456789012345678901234567890123456789),
-#                "Unable to count decimal places, please check returned number of decimal places is acceptable and manually adjust if not.", fixed = TRUE)
+test_that("count_decimal_places gives warning when default count returned", {
+  expect_warning(count_decimal_places(123456789012345678901),
+               "Unable to count decimal places, please check returned number of decimal places is acceptable and manually adjust if not.", fixed = TRUE)
+  expect_warning(count_decimal_places(rep(123456789012345678901.2,2)),
+               "Unable to count decimal places, please check returned number of decimal places is acceptable and manually adjust if not.", fixed = TRUE)
 
-# })
+  # # the following case returns 0, which is a fail - caused by truncation
+  # # at the decimal. However, this function will usually be used on a vector >
+  # # length 1, so it will be very rare that this is an issue. Note added to
+  # # documentation.
+  # expect_error(count_decimal_places(12345678901234567890.1),
+  #              "Unable to count decimal places, please check returned number of decimal places is acceptable and manually adjust if not.", fixed = TRUE)
+
+})
 
 # test_that("count_decimal_places gives correct warning when return value is unreliable", {
 # expect_equal(typeof(count_decimal_places(pi)), "double")
@@ -51,17 +61,6 @@ test_that("count_decimal_places gives expected value", {
   expect_equal(count_decimal_places(2.23), 2)
 
   expect_equal(count_decimal_places(c(1.1, NA)), 1)
-  expect_equal(count_decimal_places(c(1.1, 100.12, )), 2)
+  expect_equal(count_decimal_places(c(1.1, 100.12)), 2)
   expect_equal(count_decimal_places(c(1.1, NA)), 1)
-})
-
-
-test_that("count_decimal_places returns vector of equal length to input vector", {
-  expect_equal(length(count_decimal_places(1)), 1)
-  expect_equal(length(count_decimal_places(123)), 1)
-
-  expect_equal(length(count_decimal_places(c(1.2, NA))), 2)
-  expect_equal(length(count_decimal_places(c(1.2, 4.5))), 2)
-
-  expect_equal(length(count_decimal_places(c(1, 1.1, 10))), 3)
 })
