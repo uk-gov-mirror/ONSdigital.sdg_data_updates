@@ -125,7 +125,7 @@ region_counts <- count_respondents(unpaid_family_workers, "GeoCode")
 region_by_sector_counts <- count_respondents(unpaid_family_workers, c("GeoCode", "Sector"))
 
 country_counts <- count_respondents(unpaid_family_workers, "Country")
-country_by_sector_counts <- count_respondents(c(unpaid_family_workers, "Country", "Sector"))
+country_by_sector_counts <- count_respondents(unpaid_family_workers, c("Country", "Sector"))
 country_by_sex_counts <- count_respondents(unpaid_family_workers, c("Country", "SEX"))
 
 total_count <- summarise(unpaid_family_workers, count = n())
@@ -136,7 +136,7 @@ all_counts <- bind_rows(sector_counts, sex_counts, sex_by_sector_counts,
                         total_count) %>% 
   filter(!GeoCode %in% c("N99999999", "S99999999", "W99999999")) 
 
-all_counts_one_geography <- all_counts
+all_counts_one_geography <- all_counts %>% 
   mutate(GeoCode = coalesce(GeoCode, Country)) %>% 
   select(-Country)
 
@@ -179,7 +179,7 @@ csv <- quality_control %>%
            GeoCode == "N92000002" ~ "Northern Ireland",
            GeoCode == "E92000001" ~ "England",
            TRUE ~ "")) %>% 
-  select(Year, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value, 
+  select(Year,Country, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value, 
          `Number of respondents`) 
 
 #### Checks
