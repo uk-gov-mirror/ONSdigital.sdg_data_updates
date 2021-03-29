@@ -3,17 +3,18 @@
 # The code below performs some pre-processing before feeding the data to the WHO function,
 # and post-processing before outputting a single csv with the final data for the corresponding year
 # NB: The WHO function needs to be run on each year of data separately
-#     It is assumed there are no suppressions in the data, 
+#     It is assumed there are no suppressions or missing values in the data, 
 #     and that non-numerical variables are formatted as characters, not factors
 #
 # INPUT: .csv file with NCMP data (separate file for each year) with the following variables present:
-# [GenderCode]	    Sex of child coded as M and F (or 1 = male, 2 = female)
-# [AgeInMonths]	    Age at time of measurement 
-# [Ethnicity_desc]	17 ethnic groups, text descriptions e.g.  White - British
-# [Height]	        Height in cm 
-# [Weight]	        Weight in kg 
+# [GenderCode]	                      Sex of child coded as M and F (or 1 = male, 2 = female)
+# [AgeInMonths]	                      Age at time of measurement 
+# [Ethnicity_desc]	                  17 ethnic groups, text descriptions e.g.  White - British
+# [Height]	                          Height in cm 
+# [Weight]	                          Weight in kg 
 # [PupilIndexOfMultipleDeprivationD]	IMD decile of child LSOA (NB: 1 = most deprived)
-# [PupilUrbanRuralIndicator]	ONS urban/rural classification based on child LSOA - code
+# [PupilUrbanRuralIndicator]	        ONS urban/rural classification based on child LSOA - code
+# [PupilRegionCode_ONS]               ONS region code based of child postcode
 # 
 # 
 # The output would be the the levels of the variables above as rows, disaggregated on: 
@@ -69,6 +70,7 @@ SDG_2.2 <- anthro_prevalence(sex = NCMP_data$GenderCode,
                              lenhei = NCMP_data$Height, 
                              measure = "H",
                              wealthq = NCMP_data$pupil_imd_quintile,
+                             gregion = NCMP_data$PupilRegionCode_ONS,
                              typeres = NCMP_data$PupilUrbanRuralIndicator,
                              othergr = NCMP_data$Ethnicity_desc)
 
