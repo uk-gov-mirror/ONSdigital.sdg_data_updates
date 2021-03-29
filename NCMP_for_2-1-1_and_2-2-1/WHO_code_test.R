@@ -1,10 +1,12 @@
 ###############################################################################################
 #
-# The user must set the working directory to match the directory of this R script
-# setwd() # uncomment this line to set the directory of the downloded script,, + csv files, keeping the folder with the data one directory above
 #
+# NB: The WHO function needs to be run on each year of data separately - so 1 csv input/output file per year
+# USER INPUT:
 #
-#NB: The WHO function needs to be run on each year of data separately - so 1 csv file per year
+file_year <- 201819 # CHANGE to the years this data refers to
+input_filepath <- "D:/SDG general/DAO stuff/NCMP/ncmp_1819_final_non_disclosive_published.csv"
+output_filepath <- "D:/SDG general/DAO stuff/NCMP"
 ###############################################################################################
 
 # install the package and load it in your R session:
@@ -13,8 +15,7 @@ library(anthro) #need to run every time you start a new session, if you want to 
 
 
 # reading the data from 2018-19 download of the zipped file from NHS Digital, after extracting
-# assuming the data csv is one level up from the current working directory
-NCMP_data <- read.csv("../ncmp_1819_final_non_disclosive_published.csv")
+NCMP_data <- read.csv(input_filepath)
 
 
 # truncating the age in months variable, so 49.9 is classed as 49
@@ -83,15 +84,18 @@ rownames(test_NCMP)[first_Q:(first_Q + 4)] <- c("School IMD Q1: most deprived",
 
 
 #these are the columns of interest from the function output (based on the function documentation)
-cols_to_keep <- c("HAZ_pop","HA_2_r", "WH2_r", "WH_2_r") 
+cols_to_keep <- c("HAZ_unwpop","HA_2_r", "WH2_r", "WH_2_r") 
 final_result <- test_NCMP[, cols_to_keep] # keeping only the useful columns
 #removing obsolete rows (we only have 1 age group, so deleting repetitions)
 final_result <- final_result[!(row.names(final_result) %in% c("All", "Sex: Female","Sex: Male")), ]
 #renaming the columns to more meaningful things
-colnames(final_result) <- c("SampleSize","HeightforAge_-2SD", "WeightforHeight_+2SD", "WeightforHeight_-2SD")
+colnames(final_result) <- c("Unweighted sample size", 
+                            "Prevalence of stunting", 
+                            "Prevalence of malnutrition (overweight)", 
+                            "Prevalence of malnutrition (wasting)")
 
-#final result output. IMD is not available as an interaction with other variables
+# IMD is not available as an interaction with other variables
 # sample sizes are very small, but this should not be the case for the unsuppressed data
-file_year <- 201819 # CHANGE to the year this data refers to
-write.csv(final_result, paste("../Target_2.2_", file_year, ".csv", sep=""))
+
+write.csv(final_result, paste(output_filepath,"/Target_2.2_", file_year, ".csv", sep=""))
 
