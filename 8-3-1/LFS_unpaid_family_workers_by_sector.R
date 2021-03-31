@@ -110,11 +110,11 @@ disaggregation_data_for_calculations <- numerators %>%
   # mutate(Value = (informal_employment/Total_employment)*100)
   
 headline_data_for_calculations <- disaggregation_data_for_calculations %>% 
-  group_by(SEX, GeoCode) %>% 
+  filter(is.na(SEX)) %>% 
+  group_by(Sector) %>% 
   summarise(Total_employment = sum(Total_employment),
             informal_employment = sum(informal_employment), .groups = 'drop')
 
-  
 all_data <- bind_rows(headline_data_for_calculations, disaggregation_data_for_calculations) %>% 
   mutate(Value = (informal_employment/Total_employment)*100) %>% 
   distinct()
