@@ -13,7 +13,8 @@
 
 library(haven)
 library(tidyr)
-library(dplyr) 
+library(dplyr)
+library(DT)
 
 ###############
 check_for_caseno_repeats <- function(dat) {
@@ -109,12 +110,14 @@ disaggregation_data_for_calculations <- numerators %>%
   # mutate(Value = (informal_employment/Total_employment)*100)
   
 headline_data_for_calculations <- disaggregation_data_for_calculations %>% 
-  group_by(SEX, GeoCode) %>% 
+  filter(is.na(SEX)) %>% 
+  group_by(Sector) %>% 
   summarise(Total_employment = sum(Total_employment),
             informal_employment = sum(informal_employment), .groups = 'drop')
-  
+
 all_data <- bind_rows(headline_data_for_calculations, disaggregation_data_for_calculations) %>% 
-  mutate(Value = (informal_employment/Total_employment)*100) 
+  mutate(Value = (informal_employment/Total_employment)*100) %>% 
+  distinct()
 
 # count number of respondents 
 sector_counts <- count_respondents(unpaid_family_workers, "Sector")
@@ -150,7 +153,9 @@ quality_control <- all_data %>%
          Total_employment = ifelse(`Number of respondents` == "suppressed", NA, Total_employment),
          informal_employment = ifelse(`Number of respondents` == "suppressed", NA, informal_employment))
 
-csv <- quality_control %>%
+all_data_csv <- quality_control %>%
+  rename(`Informal employment` = informal_employment,
+         `Total employment` = Total_employment) %>% 
   mutate(`Unit measure` = "Percentage (%)",
          `Unit multiplier`= "Units",
          `Observation status`= "Undefined",
@@ -158,6 +163,8 @@ csv <- quality_control %>%
          Sector = ifelse(is.na(Sector), "", Sector),
          GeoCode = ifelse(is.na(GeoCode), "", GeoCode),
          Value = ifelse(is.na(Value), "", as.character(Value)),
+         `Informal employment` = ifelse(is.na(`Informal employment`), "", `Informal employment`),
+         `Total employment` = ifelse(is.na(`Total employment`), "", `Total employment`),
          Sex = case_when(
            SEX == 1 ~ "Male",
            SEX == 2 ~ "Female",
@@ -178,9 +185,17 @@ csv <- quality_control %>%
            GeoCode == "S92000003" ~ "Scotland",
            GeoCode == "N92000002" ~ "Northern Ireland",
            GeoCode == "E92000001" ~ "England",
-           TRUE ~ "")) %>% 
-  select(Year,Country, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value, 
-         `Number of respondents`) 
+           TRUE ~ "")) %>%
+  select(Year,Country, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, `Total employment`, `Informal employment`, Value, 
+         `Number of respondents`)
+
+
+csv_to_publish_prep <- all_data_csv %>%
+  mutate(Country_UK = case_when((Country == "" & Region == "" ) ~ "United Kingdom", 
+                                TRUE ~ "")) %>% 
+  mutate(Country = ifelse(Country == "", NA, Country)) %>% 
+  mutate(Country = coalesce(Country, Country_UK)) %>% 
+  select(-c(`Observation status`, `Unit multiplier`, `Unit measure`,"Country_UK"))
 
 #### Checks
 
