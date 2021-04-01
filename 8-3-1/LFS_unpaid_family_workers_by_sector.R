@@ -222,6 +222,17 @@ sector_by_country <- publication_data %>%
   arrange(Sector, Country_order) %>% 
   select(-c(Region, Sex, Country_order))
 
+country_by_sex <- publication_data %>%
+  filter(Region == "" & Sex != "Total" & Sector == "Total") %>% 
+  mutate(Country_order = case_when(
+    Country == "England" ~ 1,
+    Country == "Northern Ireland" ~ 2,
+    Country == "Scotland" ~ 3,
+    Country == "Wales" ~ 4,
+    Country == "United Kingdom" ~ 5)) %>% 
+  arrange(Sex, Country_order) %>% 
+  select(-c(Region, Country_order, Sector))
+
 
 #### Checks
 

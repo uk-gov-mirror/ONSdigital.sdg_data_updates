@@ -4,8 +4,6 @@
 #           This file is called by update_indicator_main.R 
 
 library(haven)
-library(tidyr)
-library(dplyr)
 library(openxlsx)
 
 # need to put in a stop if the user hasn't installed these packages - how though?
@@ -69,6 +67,7 @@ csv_data_compiled <- data.frame()
 sector_by_country_compiled <- data.frame()
 sector_by_region_compiled <- data.frame()
 sector_by_sex_compiled <- data.frame()
+country_by_sex_compiled <- data.frame()
 
 repeat_checks_compiled <- data.frame()
 disaggregations_with_low_counts_compiled <- data.frame()
@@ -87,9 +86,11 @@ for (i in 1:length(year_filepaths)) {
   source("LFS_unpaid_family_workers_by_sector.R")
   
   csv_data_compiled <- bind_rows(csv_data_compiled, csv)
-  sector_by_country_compiled <- bind_rows(sector_by_country, csv)
-  sector_by_region_compiled <- bind_rows(sector_by_region, csv)
-  sector_by_sex_compiled <- bind_rows(sector_by_sex, csv)
+  
+  sector_by_country_compiled <- bind_rows(sector_by_country_compiled, sector_by_country)
+  sector_by_region_compiled <- bind_rows(sector_by_region_compiled, sector_by_region)
+  sector_by_sex_compiled <- bind_rows(sector_by_sex_compiled, sector_by_sex)
+  country_by_sex_compiled <- bind_rows(country_by_sex_compiled, country_by_sex)
   
   suppressed <- suppressed_data
   
@@ -106,7 +107,7 @@ for (i in 1:length(year_filepaths)) {
 
 # Warn the user about failed checks (this info is also given in the run_info file)
 if (any(repeat_checks_compiled$repeated_respondents > 0)) {
-  warning("There were one or more repeated respondents in one or more years. Please investigate (see run repo")
+  warning("There were one or more repeated respondents in one or more years. Please investigate (see run repo)")
 }
 
 if (nrow(disaggregations_with_low_counts_compiled) > 0) {
@@ -119,42 +120,12 @@ if (nrow(suppressed_data_compiled) > 0) {
 
 setwd(output_directory)
 
-# Create and save file containing run info
-low_counts_text <- ifelse(nrow(disaggregations_with_low_counts_compiled) == 0, 
-                          "Respondent counts are all greater than 25 (check passed)", 
-                          "WARNING: Some respondent counts for one or more disaggregations are low (<= 25) - see table below")
-suppressed_data_text <- ifelse(nrow(suppressed_data_compiled) == 0, 
-                               "Respondent counts are all greater than 3 (check passed)", 
-                               "WARNING: Some respondent counts for one or more disaggregations are 3 or lower and have been suppressed - see table below")
-repeat_respondents_text <- ifelse(all(repeat_checks_compiled$repeated_respondents == 0), 
-                                  "There were no repeat respondents (check passed)",
-                                  "WARNING: There were one or more repeated respondents in one or more years - see table below")
-
-filepath_list <- paste0(filepath, year_filepaths, collapse = "\n")
-
-run_info <- paste0("8-3-1 update \n\n",
-                   "Date and time of run: ", run_date_time, "\n",
-                   "File(s) used: ", filepath_list, "\n\n",
-                   "Checks: \n",
-                   low_counts_text, "\n",
-                   suppressed_data_text, "\n",
-                   repeat_respondents_text, "\n")
-
-cat(run_info, file = run_info_filename, append = FALSE)
-cat("\n Disaggregation combinations where one or more counts are 25 or lower:\n\n", file = run_info_filename, append = TRUE)
-write.table(disaggregations_with_low_counts_compiled, 
-            file = run_info_filename, append = TRUE, sep='\t\t', 
-            row.names = FALSE, col.names = TRUE)
-cat("\n Rows where count is 3 or lower:\n\n", file = run_info_filename, append = TRUE)
-write.table(suppressed_data_compiled, 
-            file = run_info_filename, append = TRUE, sep='\t\t', 
-            row.names = FALSE, col.names = TRUE)
-cat("\n Number of times respondents appear in the data:\n\n", file = run_info_filename, append = TRUE)
+# save data
+source("run_info.R")
 write.table(repeat_checks_compiled, 
             file = run_info_filename, append = TRUE, sep='\t', 
             row.names = FALSE, col.names = TRUE)
 
-# save data
 write.csv(csv_data_compiled, csv_data_filename, row.names = FALSE)
 print(paste("data for 8-3-1 have been compiled and saved as", csv_data_filename))
 
