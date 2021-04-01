@@ -11,10 +11,7 @@
 
 # Code last updated: 22/03/2021
 
-library(haven)
-library(tidyr)
-library(dplyr)
-library(DT)
+
 
 ###############
 check_for_caseno_repeats <- function(dat) {
@@ -42,6 +39,7 @@ sum_weights <- function(dat, group_var, new_col) {
     summarise(!!new_col_name := sum(weight), .groups = 'drop') 
 }
 
+
 ##########
 
 APS_data <- read_sav(paste0(filepath, year_filepath))
@@ -63,12 +61,12 @@ unpaid_family_workers  <- employed %>%
 
 #####################
 # get denominators
-total_employed_by_sector <- sum_weights(employed, "Sector", Total_employment)
-total_employed_by_sector_by_sex <- sum_weights(employed, c("Sector", "SEX"), Total_employment)
-
+total_employed_by_sex <- sum_weights(employed, "SEX", Total_employment) 
 total_employed_by_country <-  sum_weights(employed, "Country", Total_employment)
 total_employed_by_region <-  sum_weights(employed, "GeoCode", Total_employment)
+total_employed_by_sector <- sum_weights(employed, "Sector", Total_employment) 
 
+total_employed_by_sector_by_sex <- sum_weights(employed, c("Sector", "SEX"), Total_employment)
 total_employed_by_country_by_sex <- sum_weights(employed, c("Country", "SEX"), Total_employment)
 
 total_employed_by_country_by_sector <-  sum_weights(employed, c("Country", "Sector"), Total_employment)
@@ -81,15 +79,15 @@ regional_employed_totals <- bind_rows(total_employed_by_country, total_employed_
   mutate(GeoCode = coalesce(GeoCode, Country)) %>% 
   select(-Country)
 
-denominators <- bind_rows(total_employed_by_sector, total_employed_by_sector_by_sex, regional_employed_totals)
+denominators <- bind_rows(total_employed_by_sex, total_employed_by_sector, total_employed_by_sector_by_sex, regional_employed_totals)
 
 # get numerators
-informal_employed_by_sector <- sum_weights(unpaid_family_workers, "Sector", informal_employment)
-informal_employed_by_sector_by_sex <- sum_weights(unpaid_family_workers, c("Sector", "SEX"), informal_employment) 
-
+informal_employed_by_sex <- sum_weights(unpaid_family_workers, "SEX", informal_employment) 
 informal_employed_by_country <- sum_weights(unpaid_family_workers, "Country", informal_employment)
 informal_employed_by_region <- sum_weights(unpaid_family_workers, "GeoCode", informal_employment)
+informal_employed_by_sector <- sum_weights(unpaid_family_workers, "Sector", informal_employment)
 
+informal_employed_by_sector_by_sex <- sum_weights(unpaid_family_workers, c("Sector", "SEX"), informal_employment) 
 informal_employed_by_country_by_sex <- sum_weights(unpaid_family_workers, c("Country", "SEX"), informal_employment)
 
 informal_employed_by_country_by_sector <- sum_weights(unpaid_family_workers, c("Country", "Sector"), informal_employment)
@@ -102,22 +100,19 @@ regional_unpaid_family_workers_totals <- bind_rows(informal_employed_by_country,
   mutate(GeoCode = coalesce(GeoCode, Country)) %>% 
   select(-Country)
 
-numerators <- bind_rows(informal_employed_by_sector, informal_employed_by_sector_by_sex, regional_unpaid_family_workers_totals)
+numerators <- bind_rows(informal_employed_by_sex, informal_employed_by_sector, informal_employed_by_sector_by_sex, regional_unpaid_family_workers_totals)
 
 # Join data and do calculations 
 disaggregation_data_for_calculations <- numerators %>% 
   left_join(denominators, by = c("SEX", "Sector", "GeoCode")) 
-  # mutate(Value = (informal_employment/Total_employment)*100)
-  
+
 headline_data_for_calculations <- disaggregation_data_for_calculations %>% 
-  filter(is.na(SEX)) %>% 
-  group_by(Sector) %>% 
+  filter(is.na(GeoCode) & is.na(SEX)) %>% 
   summarise(Total_employment = sum(Total_employment),
             informal_employment = sum(informal_employment), .groups = 'drop')
 
 all_data <- bind_rows(headline_data_for_calculations, disaggregation_data_for_calculations) %>% 
-  mutate(Value = (informal_employment/Total_employment)*100) %>% 
-  distinct()
+  mutate(Value = (informal_employment/Total_employment)*100) 
 
 # count number of respondents 
 sector_counts <- count_respondents(unpaid_family_workers, "Sector")
@@ -143,7 +138,7 @@ all_counts_one_geography <- all_counts %>%
   mutate(GeoCode = coalesce(GeoCode, Country)) %>% 
   select(-Country)
 
-# suppress low counts and create csv
+# add count information and suppress low counts
 quality_control <- all_data %>% 
   left_join(all_counts_one_geography, by = c("SEX", "Sector", "GeoCode")) %>% 
   rename(`Number of respondents` = count) %>% 
@@ -153,18 +148,11 @@ quality_control <- all_data %>%
          Total_employment = ifelse(`Number of respondents` == "suppressed", NA, Total_employment),
          informal_employment = ifelse(`Number of respondents` == "suppressed", NA, informal_employment))
 
-all_data_csv <- quality_control %>%
-  rename(`Informal employment` = informal_employment,
-         `Total employment` = Total_employment) %>% 
-  mutate(`Unit measure` = "Percentage (%)",
-         `Unit multiplier`= "Units",
-         `Observation status`= "Undefined",
-         Year = substr(year_filepath, 1, 4),
+for_publication_and_csv <- quality_control %>%
+  mutate(Year = year, # year is defined in compile_tables
          Sector = ifelse(is.na(Sector), "", Sector),
          GeoCode = ifelse(is.na(GeoCode), "", GeoCode),
-         Value = ifelse(is.na(Value), "", as.character(Value)),
-         `Informal employment` = ifelse(is.na(`Informal employment`), "", `Informal employment`),
-         `Total employment` = ifelse(is.na(`Total employment`), "", `Total employment`),
+         # Value = ifelse(is.na(Value), "", as.character(Value)),
          Sex = case_when(
            SEX == 1 ~ "Male",
            SEX == 2 ~ "Female",
@@ -185,17 +173,16 @@ all_data_csv <- quality_control %>%
            GeoCode == "S92000003" ~ "Scotland",
            GeoCode == "N92000002" ~ "Northern Ireland",
            GeoCode == "E92000001" ~ "England",
-           TRUE ~ "")) %>%
-  select(Year,Country, Region, Sex, Sector, `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, `Total employment`, `Informal employment`, Value, 
-         `Number of respondents`)
+           TRUE ~ "")) %>% 
+  select(-SEX)
 
+csv <- for_publication_and_csv %>%
+  mutate(`Unit measure` = "Percentage (%)",
+         `Unit multiplier`= "Units",
+         `Observation status`= "Undefined") %>%
+  select(Year,Country, Region, Sex, Sector, 
+         `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value)
 
-csv_to_publish_prep <- all_data_csv %>%
-  mutate(Country_UK = case_when((Country == "" & Region == "" ) ~ "United Kingdom", 
-                                TRUE ~ "")) %>% 
-  mutate(Country = ifelse(Country == "", NA, Country)) %>% 
-  mutate(Country = coalesce(Country, Country_UK)) %>% 
-  select(-c(`Observation status`, `Unit multiplier`, `Unit measure`,"Country_UK"))
 
 #### Checks
 

@@ -3,9 +3,15 @@
 # Requires: Access to the LFS_SPSS drive.
 #           This file is called by update_indicator_main.R 
 
+library(haven)
+library(tidyr)
+library(dplyr)
+library(openxlsx)
+
+
 run_date_time <- Sys.time()
 
-reformat_for_for_filename <- function(run_date_time) {
+reformat_for_filename <- function(run_date_time) {
   run_date_time_no_spaces <- gsub(" ", "_", as.character(run_date_time))
   run_date_time_no_colons <- gsub(":", "-", as.character(run_date_time_no_spaces))
 }
@@ -21,9 +27,14 @@ repeat_checks_compiled <- data.frame()
 disaggregations_with_low_counts_compiled <- data.frame()
 suppressed_data_compiled <- data.frame()
 
+all_years <- c()
+
 for (i in 1:length(year_filepaths)) {
   
   year_filepath <- year_filepaths[i]
+  
+  year <- substr(year_filepath, 1, 4)
+  all_years[i] <- as.numeric(year)
   
   source("LFS_unpaid_family_workers_by_sector.R")
   
