@@ -16,7 +16,7 @@
 ###############
 check_for_caseno_repeats <- function(dat) {
   dat %>%
-    group_by(caseno) %>%
+    group_by(CASENO) %>%
     summarise(caseno_count = n(), .groups = 'drop') %>%
     filter(caseno_count > 1)
 }
@@ -42,10 +42,13 @@ sum_weights <- function(dat, group_var, new_col) {
 
 ##########
 
-APS_data <- read_sav(paste0(filepath, year_filepath))
+
+APS_data <- read_sav(input)
+
+colnames(APS_data) <- toupper(colnames(APS_data)) # column name case varies from year to year
 
 employed <- APS_data %>% 
-  select(INECAC05, INDS07M, SEX, PWTA18, caseno, GOR9D, CTRY9D) %>% 
+  select(INECAC05, INDS07M, SEX, PWTA18, CASENO, GOR9D, CTRY9D) %>% 
   rename(industry = INDS07M,
          employment_status = INECAC05,
          weight = PWTA18,
@@ -176,12 +179,48 @@ for_publication_and_csv <- quality_control %>%
            TRUE ~ "")) %>% 
   select(-SEX)
 
+# final table for current year for indicator csv
 csv <- for_publication_and_csv %>%
   mutate(`Unit measure` = "Percentage (%)",
          `Unit multiplier`= "Units",
          `Observation status`= "Undefined") %>%
   select(Year,Country, Region, Sex, Sector, 
          `Observation status`, `Unit multiplier`, `Unit measure`, GeoCode, Value)
+
+#### publication ###
+publication_data <- for_publication_and_csv %>%
+  mutate(Country = ifelse(Country == "" & Region == "", "United Kingdom", Country),
+         Sex = ifelse(Sex == "", "Total", Sex),
+         Sector = ifelse(Sector == "", "Total", Sector),
+         `Number of people in informal employment` = ifelse(is.na(informal_employment), "-", informal_employment),
+         `Number of people in employment` = ifelse(is.na(Total_employment), "-", Total_employment),
+         `Proportion of employed people in informal employment` = ifelse(Value == "" | is.na(Value), "-", Value)) %>% 
+  mutate(Country = ifelse(Region != "", "England", Country)) %>% 
+  select(Year, Sector, Country, Region, Sex, GeoCode, 
+         `Number of people in employment`, `Number of people in informal employment`, `Proportion of employed people in informal employment`, 
+         `Number of respondents`)
+
+# final tables for ad-hoc
+sector_by_sex <- publication_data %>%
+  filter(Country == "United Kingdom") %>% 
+  arrange(Sector, Sex) %>% 
+  select(-c(Country, Region, GeoCode))
+
+sector_by_region <- publication_data %>%
+  filter(Sex == "Total" & Region != "") %>% 
+  arrange(Sector, Region) %>% 
+  select(-c(Sex, Country))
+
+sector_by_country <- publication_data %>%
+  filter(Region == "" & Sex == "Total") %>% 
+  mutate(Country_order = case_when(
+           Country == "England" ~ 1,
+           Country == "Northern Ireland" ~ 2,
+           Country == "Scotland" ~ 3,
+           Country == "Wales" ~ 4,
+           Country == "United Kingdom" ~ 5)) %>% 
+  arrange(Sector, Country_order) %>% 
+  select(-c(Region, Sex, Country_order))
 
 
 #### Checks
