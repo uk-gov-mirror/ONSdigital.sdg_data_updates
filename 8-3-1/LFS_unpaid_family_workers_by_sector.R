@@ -230,7 +230,7 @@ country_by_sex <- publication_data %>%
     Country == "Scotland" ~ 3,
     Country == "Wales" ~ 4,
     Country == "United Kingdom" ~ 5)) %>% 
-  arrange(Sex, Country_order) %>% 
+  arrange(Country_order, Sex) %>% 
   select(-c(Region, Country_order, Sector))
 
 

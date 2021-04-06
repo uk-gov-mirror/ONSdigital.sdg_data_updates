@@ -118,16 +118,14 @@ if (nrow(suppressed_data_compiled) > 0) {
   warning("There were fewer than 3 respondents for some disaggregations. These values have been suppressed in the output csv")
 }
 
-setwd(output_directory)
-
 # save data
-source("run_info.R")
-write.table(repeat_checks_compiled, 
-            file = run_info_filename, append = TRUE, sep='\t', 
-            row.names = FALSE, col.names = TRUE)
+
+source("Publication.R")
+print(paste0("The Excel file for the ad-hoc publication has been saved as ", output_directory, "ad_hoc_", run_date, ".xlsx"))
+
+source("run_info.R") # output_directory is set in run_info.R
 
 write.csv(csv_data_compiled, csv_data_filename, row.names = FALSE)
 print(paste("data for 8-3-1 have been compiled and saved as", csv_data_filename))
 
-source("Publication.R")
-print(paste0("The Excel file for the ad-hoc publication has been saved as ", output_directory, "ad_hoc_", run_date, ".xlsx"))
+

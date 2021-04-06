@@ -4,6 +4,7 @@
 # and saves it in excel for publication.
 # Formatting and removal of respondent count column needs to be done in Excel.
 
+
 if (min(all_years) == max(all_years)) {
   period <- all_years
 } else {
@@ -106,7 +107,7 @@ writeData(wb, "Sector by sex",
           colNames = TRUE)
 writeData(wb, "Sector by sex", 
           "Quality indicator", 
-          startRow = nrow(sector_by_sex) + 5)
+          startRow = nrow(sector_by_sex_compiled) + 5)
 writeData(wb, "Sector by sex", 
           "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(sector_by_sex_compiled) + 6)
@@ -132,7 +133,7 @@ writeData(wb, "Country by sex",
           "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
           startRow = nrow(country_by_sex_compiled) + 7)
 
-saveWorkbook(wb, paste0("ad_hoc_", run_date, ".xlsx"), overwrite = TRUE)
+saveWorkbook(wb, paste0(output_directory, "/", "ad_hoc_", run_date, ".xlsx"), overwrite = TRUE)
 
 ###################
 # KableExtra makes a beautiful table, but it seems it can't be saved to Excel (sigh)

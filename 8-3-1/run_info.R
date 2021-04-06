@@ -1,4 +1,8 @@
-# Create containing run info
+
+# Create run info file
+
+setwd(output_directory)
+
 low_counts_text <- ifelse(nrow(disaggregations_with_low_counts_compiled) == 0, 
                           "Respondent counts are all greater than 25 (check passed)", 
                           "WARNING: Some respondent counts for one or more disaggregations are low (<= 25) - see table below")
@@ -29,3 +33,6 @@ write.table(suppressed_data_compiled,
             file = run_info_filename, append = TRUE, sep='\t\t', 
             row.names = FALSE, col.names = TRUE)
 cat("\n Number of times respondents appear in the data:\n\n", file = run_info_filename, append = TRUE)
+write.table(repeat_checks_compiled, 
+            file = run_info_filename, append = TRUE, sep='\t', 
+            row.names = FALSE, col.names = TRUE)
