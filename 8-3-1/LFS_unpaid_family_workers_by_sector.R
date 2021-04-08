@@ -145,7 +145,7 @@ all_counts_one_geography <- all_counts %>%
 quality_control <- all_data %>% 
   left_join(all_counts_one_geography, by = c("SEX", "Sector", "GeoCode")) %>% 
   rename(`Number of respondents` = count) %>% 
-  mutate(`Number of respondents` = ifelse(`Number of respondents` <= 3, 
+  mutate(`Number of respondents` = ifelse(`Number of respondents` < 3, 
                                           "suppressed", as.character(`Number of respondents`)),
          Value = ifelse(`Number of respondents` == "suppressed", NA, Value),
          Total_employment = ifelse(`Number of respondents` == "suppressed", NA, Total_employment),
@@ -163,7 +163,7 @@ for_publication_and_csv <- quality_control %>%
          Region = case_when(
            GeoCode == "E12000001" ~ "North East",
            GeoCode == "E12000002" ~ "North West",
-           GeoCode == "E12000003" ~ "Yorkshire and the Humber",
+           GeoCode == "E12000003" ~ "Yorkshire and The Humber",
            GeoCode == "E12000004" ~ "East Midlands",
            GeoCode == "E12000005" ~ "West Midlands",
            GeoCode == "E12000006" ~ "East of England",
@@ -190,6 +190,7 @@ csv <- for_publication_and_csv %>%
 #### publication ###
 publication_data <- for_publication_and_csv %>%
   mutate(Country = ifelse(Country == "" & Region == "", "United Kingdom", Country),
+         Geocode = ifelse(Country == "United kingdom", "K02000001", GeoCode),
          Sex = ifelse(Sex == "", "Total", Sex),
          Sector = ifelse(Sector == "", "Total", Sector),
          `Number of people in informal employment` = ifelse(is.na(informal_employment), "-", informal_employment),
@@ -208,7 +209,7 @@ sector_by_sex <- publication_data %>%
 
 sector_by_region <- publication_data %>%
   filter(Sex == "Total" & Region != "") %>% 
-  arrange(Sector, Region) %>% 
+  arrange(Sector, GeoCode) %>% 
   select(-c(Sex, Country))
 
 sector_by_country <- publication_data %>%
