@@ -10,7 +10,7 @@ library(openxlsx)
 
 run_date_time <- Sys.time()
 run_date <- Sys.Date()
-run_date_formatted <- format.Date(run_date, "%m/%d/%y")
+run_date_formatted <- format.Date(run_date, "%d/%m/%y")
 
 reformat_for_filename <- function(run_date_time) {
   run_date_time_no_spaces <- gsub(" ", "_", as.character(run_date_time))

@@ -24,6 +24,7 @@ info <- data.frame("Info" = c(
   "Office for National Statistics",
   "", 
   "Proportion of informal employment in total employment, by sector (agriculture/ non-agriculture) and sex",
+  "For the purposes of reporting SDG indicator 8.3.1, we have defined informal employment as people who identify as unpaid family workers, this includes individuals who are either doing unpaid work for their own business or a relative's business",
   "These data are used to report indicator 8.3.1 of the Sustainable Development Goals",
   "",
   "Geographical coverage: United Kingdom",
@@ -88,7 +89,7 @@ writeData(wb, "Sector by region",
           "Quality indicator", 
           startRow = nrow(sector_by_region_compiled) + 5)
 writeData(wb, "Sector by region", 
-          "A dash (-) is given for suppressed estimates where the sample size is 3 or lower", 
+          "A dash (-) is given for suppressed estimates where the sample size is less than 3", 
           startRow = nrow(sector_by_region_compiled) + 6)
 writeData(wb, "Sector by region", 
           "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
