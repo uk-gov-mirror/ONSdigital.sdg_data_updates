@@ -3,8 +3,9 @@
 # LOCATION OF DATA
 # replace drive with relevant letter for your computer
 filepath <- "X:/APS Databases/2018 Reweighted Files/"
-year_filepaths <- c("2020/APSP_JD20_CLIENT_PWTA18.sav", # Different file path for 2020 - Assuming 'JD20' means Jan-Dec 2020
-                    "2019/APSP_Jan_Dec2019_PWT18/APSP_Jan_Dec2019_PWT18.sav") #,
+year_filepaths <- c("2019/APSP_Jan_Dec2019_PWT18/APSP_Jan_Dec2019_PWT18.sav",
+                    "2020/APSP_JD20_CLIENT_PWTA18.sav")#, # Different file path for 2020 - Assuming 'JD20' means Jan-Dec 2020
+                     #,
                    # "2018/APSP_JAN18_DEC18_CLIENT_PWTA18/APSP_JAN18_DEC18_CLIENT_PWTA18.sav",
                    # "2017/APSP_JAN17_DEC17_CLIENT_PWTA18/APSP_JAN17_DEC17_CLIENT_PWTA18.sav",
                    # "2016/APSP_JAN16_DEC16_CLIENT_PWTA18/APSP_JAN16_DEC16_CLIENT_PWTA18.sav",

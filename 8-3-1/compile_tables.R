@@ -5,21 +5,17 @@
 
 library(haven)
 library(openxlsx)
+# could put in a stop if the user hasn't installed these packages - or will it just automatically stop
 
-# need to put in a stop if the user hasn't installed these packages - how though?
+`%not_in%` <- Negate(`%in%`)
 
 run_date_time <- Sys.time()
 run_date <- Sys.Date()
 run_date_formatted <- format.Date(run_date, "%d/%m/%y")
 
-reformat_for_filename <- function(run_date_time) {
-  run_date_time_no_spaces <- gsub(" ", "_", as.character(run_date_time))
-  run_date_time_no_colons <- gsub(":", "-", as.character(run_date_time_no_spaces))
-}
-
-run_info_filename <- paste0("run_info_", reformat_for_filename(run_date_time), ".txt")
-csv_data_filename <- paste0("8-3-1_csv_", reformat_for_filename(run_date_time), ".csv")
-csv_data_filename <- paste0("8-3-1_csv_", reformat_for_filename(run_date_time), ".csv")
+run_info_filename <- paste0("run_info_", run_date, ".txt")
+csv_data_filename <- paste0("8-3-1_csv_", run_date, ".csv")
+csv_data_filename <- paste0("8-3-1_csv_", run_date, ".csv")
 
 source("config.R")
 
@@ -32,30 +28,29 @@ for (i in 1:length(year_filepaths)) {
   input <- paste0(filepath, year_filepath)
   
   input_folder_exploded <- strsplit(year_filepath, "/")
-  input_folder <- paste0(input_folder_exploded[[1]][1], "/", input_folder_exploded[[1]][2])
-  
+
   full_input_filepath_exploded <- strsplit(input, "/")
   input_file <- full_input_filepath_exploded[[1]][length(full_input_filepath_exploded[[1]])]
   
-  first_folder <- input_folder_exploded[[1]][1]
-  available_folders_level_1 <- list.files(filepath)
+  year_folder <- input_folder_exploded[[1]][1]
+  available_year_folders <- list.files(filepath)
   
-  second_folder <- input_folder_exploded[[1]][2]
-  available_folders_level_2 <- list.files(paste0(filepath, first_folder))
+  dataset_folder <- input_folder_exploded[[1]][2]
+  available_dataset_folders <- list.files(paste0(filepath, year_folder))
   
-  available_folders_level_3 <- list.files(paste0(filepath, first_folder, "/", second_folder))
+  available_files <- list.files(paste0(filepath, year_folder, "/", dataset_folder))
   
-  if (!first_folder %in% available_folders_level_1) {
+  if (year_folder %not_in% available_year_folders) {
     
     stop(paste(input, "does not exist. Please correct year_filepaths and re-run"))
     
-  } else if (!second_folder %in% available_folders_level_2) {
+  } else if (dataset_folder %not_in% available_dataset_folders & input_file %not_in% available_dataset_folders) {
     
-    stop(paste(second_folder, "does not exist in", paste0(filepath, first_folder), ". Please correct year_filepaths in config.R and re-run"))
+    stop(paste(dataset_folder, "does not exist in", paste0(filepath, year_folder), ". Please correct year_filepaths in config.R and re-run"))
     
-  } else if (!input_file %in% available_folders_level_3) {
+  } else if (input_file %not_in% available_files & input_file %not_in% available_dataset_folders) {
     
-    stop(input_file(input_file, "does not exist in", paste0(filepath, "/", second_folder) , ". Please correct year_filepaths in config.R and re-run"))
+    stop(paste(input_file, "does not exist in", paste0(filepath, "/", dataset_folder) , ". Please correct year_filepaths in config.R and re-run"))
     
   }   
   
@@ -121,7 +116,7 @@ if (nrow(suppressed_data_compiled) > 0) {
 # save data
 
 source("Publication.R")
-print(paste0("The Excel file for the ad-hoc publication has been saved as ", output_directory, "ad_hoc_", run_date, ".xlsx"))
+print(paste0("The Excel file for the ad-hoc publication has been saved as ", output_directory, "/ad_hoc_", run_date, ".xlsx"))
 
 source("run_info.R") # output_directory is set in run_info.R
 
