@@ -1,7 +1,7 @@
 # sdg_data_updates
 
 ### General info ###
-R code for updating SDG data files. For each indicator data from the source file(s) (usually excel) are read in, calluclations required for the indicator are performed, and data are reshaped to fit the tidy format required to upload data to the SDG data platform.
+R code for updating SDG data files. For each indicator data from the source file(s) (usually excel) are read in, calculations required for the indicator are performed, and data are reshaped to fit the tidy format required to upload data to the SDG data platform.
 
 Contact: Emma Wood
 emma.wood@ons.gov.uk
