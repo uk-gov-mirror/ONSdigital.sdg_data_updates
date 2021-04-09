@@ -1,8 +1,9 @@
 #' @title Format region names
 #'
-#' @description Corrects the capitalisation of region names
+#' @description Corrects the capitalisation of region names, and corrects East
+#'   of England to East (which is standard for charts and tables).
 #'
-#' @param variable Character vector of region names.
+#' @param variable Character vector of region names
 #'
 #' @return Character vector. Function overwrites region variable with correct
 #'   capitalisation.
@@ -16,8 +17,8 @@
 #' Region <- format_region_names(test_var)
 format_region_names <- function(variable) {
   dplyr::case_when(variable == "YORKSHIRE AND THE HUMBER" ~ "Yorkshire and the Humber",
-                   variable == "EAST OF ENGLAND" ~ "East of England",
-                   variable == "Yorkshire and the Humber" ~ "Yorkshire and the Humber",
-                   variable == "East of England" ~ "East of England",
+                   variable == "EAST OF ENGLAND" ~ "East",
+                   variable == "Yorkshire and The Humber" ~ "Yorkshire and the Humber",
+                   variable == "East of England" ~ "East",
                    TRUE ~ stringr::str_to_title(variable))
 }

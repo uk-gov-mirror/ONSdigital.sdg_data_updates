@@ -7,14 +7,15 @@
 format_region_names(variable)
 }
 \arguments{
-\item{variable}{Character vector of region names.}
+\item{variable}{Character vector of region names}
 }
 \value{
 Character vector. Function overwrites region variable with correct
 capitalisation.
 }
 \description{
-Corrects the capitalisation of region names
+Corrects the capitalisation of region names, and corrects East
+of England to East (which is standard for charts and tables).
 }
 \examples{
 test_dat <- tibble(Region = c("YORKSHIRE AND THE HUMBER", "EAST OF ENGLAND", "The shire"))

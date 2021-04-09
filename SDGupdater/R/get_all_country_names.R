@@ -28,9 +28,9 @@ get_all_country_names <- function (variable) {
 
 #' Warning for when multiple countries have been identified by get_all_country_names()
 #'
-#' @param filename string giving name of the file
-#' @param tab string giving name of the tab
-#' @param description string describing the data that is affected (e.g. which disaggregation)#'
+#' @param filename string giving name of the file (so warning is specific)
+#' @param tab string giving name of the tab (so warning is specific)
+#' @param description string describing the data that is affected (e.g. which disaggregation)
 #'
 #' @return a warning
 #'

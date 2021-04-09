@@ -2,7 +2,7 @@
 # configurations for indicator 3-2-2
 
 working_directory <- "H:/Coding_repos/sdg_data_updates"
-# input_folder <- "/Input"
+input_folder <- "Example data"
 
 country_of_occurrence_by_sex_tab_name <- "Table 2"
 first_header_row_country_by_sex <- 4

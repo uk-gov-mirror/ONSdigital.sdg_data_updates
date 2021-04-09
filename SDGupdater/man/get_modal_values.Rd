@@ -16,6 +16,12 @@ Vector of same type as values.
 Finds which value occurs most frequently. If there is more than one mode, all
 will be returned
 }
+\examples{
+get_modal_values(1,2,3,1,3)
+get_modal_values(1,1,2,3)
+get_modal_values("a", "a", "b")
+
+}
 \seealso{
 From thread:
 https://stackoverflow.com/questions/2547402/how-to-find-the-statistical-mode

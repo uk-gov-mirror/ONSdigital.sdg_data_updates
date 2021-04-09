@@ -24,7 +24,7 @@ library(SDGupdater)
 
 #----------------------------------------------------------------------------------------------
 
-indicator <- "8-3-1" # name of folder for indicator
+indicator <- "3-2-2" # name of folder for indicator
 
 setwd(paste0("H:/Coding_repos/sdg_data_updates/", indicator))
 

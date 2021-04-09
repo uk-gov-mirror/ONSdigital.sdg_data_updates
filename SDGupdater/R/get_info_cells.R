@@ -22,7 +22,6 @@
 #' @export
 get_info_cells <- function(dat, first_header_row) {
 
-
   dat %>%
     filter(row %in% 1:(first_header_row - 1)) %>%
     distinct(character) %>%

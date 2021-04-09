@@ -6,7 +6,7 @@
 country_of_occurrence_by_sex_tab_name <- ask_user_for_tab_name("country of occurrence by sex", country_of_occurrence_by_sex_tab_name)
 first_header_row <- ask_user_for_first_header_row(country_of_occurrence_by_sex_tab_name, first_header_row_country_by_sex)
 
-source_data <- xlsx_cells(paste0("Input/", filename), sheets = country_of_occurrence_by_sex_tab_name)
+source_data <- xlsx_cells(paste0(input_folder, "/", filename), sheets = country_of_occurrence_by_sex_tab_name)
 
 info_cells <- get_info_cells(source_data, first_header_row)
 year <- unique_to_string(info_cells$Year)

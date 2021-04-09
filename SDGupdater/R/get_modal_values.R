@@ -13,7 +13,7 @@
 #' @examples
 #' get_modal_values(1,2,3,1,3)
 #' get_modal_values(1,1,2,3)
-#' get_modal_values("a", "a, "b")
+#' get_modal_values("a", "a", "b")
 #'
 #' @export
 get_modal_values <- function(values) {

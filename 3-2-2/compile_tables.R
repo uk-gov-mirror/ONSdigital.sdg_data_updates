@@ -1,6 +1,6 @@
 source("configs.R")
 
-filename <- ask_user_for_filename("Input")
+filename <- ask_user_for_filename(input_folder)
 
 if (get_characters_after_dot(filename) != "xlsx") {
   stop(paste("File must be an xlsx file. Save", filename, "as an xlsx and re-run script"))

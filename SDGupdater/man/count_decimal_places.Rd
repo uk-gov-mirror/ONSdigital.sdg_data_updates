@@ -6,7 +6,7 @@
 \alias{count_decimal_places_as_string}
 \title{Count number of decimal places}
 \usage{
-count_decimal_places(value, default = 20)
+count_decimal_places(value, default = 3)
 
 count_decimal_places_numerically(value)
 
@@ -16,7 +16,7 @@ count_decimal_places_as_string(value)
 \item{value}{Numeric vector.}
 
 \item{default}{The default number to be returned if the count is
-unsuccessful. Optional (defaults to 20).}
+unsuccessful. Optional (defaults to 3).}
 }
 \value{
 Numeric vector.
@@ -24,14 +24,16 @@ Numeric vector.
 \description{
 Uses two different methods for calculating the number of decimal places, and
 returns the modal value. NA's in value are ignored. If there is more than one
-modal value, the maximum is returned. For large numbers, neither counting
-method is reliable, so NA is returned. If NA is the modal value a default
-value of 20 is returned and a warning is given.
+modal value, the maximum is returned.
 }
 \details{
-Both methods fail when the number of significant figures are large (but fail
-differently), and in some other cases. The mode is used to remove unusual
-counts, and therefore get the value most likely to be correct.
+For large numbers, neither counting method is reliable, so the count of these
+numbers is given as NA. Where the two methods disagree, count is recorded as
+NA. If NA is the modal value a default value is returned and a warning is
+given.
+
+The mode is used to remove unusual counts, and therefore get the value most
+likely to be correct.
 
 count_decimal_places_numerically counts the number of decimal places used for
 a numeric variable. This should be used with caution as 'R stores numbers
@@ -70,5 +72,8 @@ count_decimal_places_as_string(test_dat5) # returns 18 because of conversion to 
 
 }
 \seealso{
-thread: https://stat.ethz.ch/pipermail/r-help/2012-July/317676.html
+Thread on counting decimal places:
+https://stat.ethz.ch/pipermail/r-help/2012-July/317676.html Rationale for
+setting default number of decimal places to 3:
+https://www.bmj.com/content/350/bmj.h1845
 }
