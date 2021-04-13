@@ -64,6 +64,9 @@ writeData(wb, "Sector by country",
           "Informal employment in the agricultural and non-agricultural sectors by country", 
           startRow = 1)
 writeData(wb, "Sector by country", 
+          "United Kingdom YEAR to YEAR (replace with period)", 
+          startRow = 2)
+writeData(wb, "Sector by country", 
           sector_by_country_compiled, 
           startRow = 3, startCol = 2,
           colNames = TRUE)
@@ -81,6 +84,9 @@ writeData(wb, "Sector by country",
 writeData(wb, "Sector by region", 
           "Informal employment in the agricultural and non-agricultural sectors by regions of England", 
           startRow = 1)
+writeData(wb, "Sector by region", 
+          "England YEAR to YEAR (replace with period)", 
+          startRow = 2)
 writeData(wb, "Sector by region", 
           sector_by_region_compiled,  
           startRow = 3, startCol = 2, 
@@ -103,6 +109,9 @@ writeData(wb, "Sector by sex",
           "Informal employment in the agricultural and non-agricultural sectors by sex", 
           startRow = 1)
 writeData(wb, "Sector by sex", 
+          "United Kingdom YEAR to YEAR (replace with period)", 
+          startRow = 2)
+writeData(wb, "Sector by sex", 
           sector_by_sex_compiled, 
           startRow = 3, startCol = 2, 
           colNames = TRUE)
@@ -120,6 +129,9 @@ writeData(wb, "Sector by sex",
 writeData(wb, "Country by sex", 
           "Informal employment by country and sex", 
           startRow = 1)
+writeData(wb, "Country by sex", 
+          "United Kingdom YEAR to YEAR (replace with period)", 
+          startRow = 2)
 writeData(wb, "Country by sex", 
           country_by_sex_compiled, 
           startRow = 3, startCol = 2, 

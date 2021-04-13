@@ -192,6 +192,8 @@ publication_data <- for_publication_and_csv %>%
   mutate(Country = ifelse(Country == "" & Region == "", "United Kingdom", Country),
          Geocode = ifelse(Country == "United Kingdom", "K02000001", GeoCode),
          Sex = ifelse(Sex == "", "Total", Sex),
+         Sex = ifelse(Sex == "Male", "Men", Sex),
+         Sex = ifelse(Sex == "Female", "Women", Sex),
          Sector = ifelse(Sector == "", "Total", Sector),
          `Number of people in informal employment` = ifelse(is.na(informal_employment), "-", informal_employment),
          `Number of people in employment` = ifelse(is.na(Total_employment), "-", Total_employment),
