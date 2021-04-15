@@ -64,87 +64,87 @@ writeData(wb, "Sector by country",
           "Informal employment in the agricultural and non-agricultural sectors by country", 
           startRow = 1)
 writeData(wb, "Sector by country", 
-          "United Kingdom YEAR to YEAR (replace with period)", 
+          paste("United Kingdom", period), 
           startRow = 2)
 writeData(wb, "Sector by country", 
           sector_by_country_compiled, 
-          startRow = 3, startCol = 2,
+          startRow = 4, startCol = 2,
           colNames = TRUE)
 writeData(wb, "Sector by country", 
           "Quality indicator", 
-          startRow = nrow(sector_by_country_compiled) + 5)
-writeData(wb, "Sector by country", 
-          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(sector_by_country_compiled) + 6)
 writeData(wb, "Sector by country", 
-          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(sector_by_country_compiled) + 7)
+writeData(wb, "Sector by country", 
+          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          startRow = nrow(sector_by_country_compiled) + 8)
 
 # Sector by region
 writeData(wb, "Sector by region", 
           "Informal employment in the agricultural and non-agricultural sectors by regions of England", 
           startRow = 1)
 writeData(wb, "Sector by region", 
-          "England YEAR to YEAR (replace with period)", 
+          paste("England", period), 
           startRow = 2)
 writeData(wb, "Sector by region", 
           sector_by_region_compiled,  
-          startRow = 3, startCol = 2, 
+          startRow = 4, startCol = 2, 
           colNames = TRUE)
 writeData(wb, "Sector by region", 
           "Quality indicator", 
-          startRow = nrow(sector_by_region_compiled) + 5)
-writeData(wb, "Sector by region", 
-          "A dash (-) is given for suppressed estimates where the sample size is less than 3", 
           startRow = nrow(sector_by_region_compiled) + 6)
 writeData(wb, "Sector by region", 
-          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
+          "A dash (-) is given for suppressed estimates where the sample size is less than 3", 
           startRow = nrow(sector_by_region_compiled) + 7)
 writeData(wb, "Sector by region", 
-          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(sector_by_region_compiled) + 8)
+writeData(wb, "Sector by region", 
+          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          startRow = nrow(sector_by_region_compiled) + 9)
 
 # Sector by sex
 writeData(wb, "Sector by sex", 
           "Informal employment in the agricultural and non-agricultural sectors by sex", 
           startRow = 1)
 writeData(wb, "Sector by sex", 
-          "United Kingdom YEAR to YEAR (replace with period)", 
+          paste("United Kingdom", period), 
           startRow = 2)
 writeData(wb, "Sector by sex", 
           sector_by_sex_compiled, 
-          startRow = 3, startCol = 2, 
+          startRow = 4, startCol = 2, 
           colNames = TRUE)
 writeData(wb, "Sector by sex", 
           "Quality indicator", 
-          startRow = nrow(sector_by_sex_compiled) + 5)
-writeData(wb, "Sector by sex", 
-          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(sector_by_sex_compiled) + 6)
 writeData(wb, "Sector by sex", 
-          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(sector_by_sex_compiled) + 7)
+writeData(wb, "Sector by sex", 
+          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          startRow = nrow(sector_by_sex_compiled) + 8)
 
 # Country by sex
 writeData(wb, "Country by sex", 
           "Informal employment by country and sex", 
           startRow = 1)
 writeData(wb, "Country by sex", 
-          "United Kingdom YEAR to YEAR (replace with period)", 
+          paste("United Kingdom", period), 
           startRow = 2)
 writeData(wb, "Country by sex", 
           country_by_sex_compiled, 
-          startRow = 3, startCol = 2, 
+          startRow = 4, startCol = 2, 
           colNames = TRUE)
 writeData(wb, "Country by sex", 
           "Quality indicator", 
-          startRow = nrow(country_by_sex_compiled) + 5)
-writeData(wb, "Country by sex", 
-          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(country_by_sex_compiled) + 6)
 writeData(wb, "Country by sex", 
-          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          "Shaded estimates are based on a small sample size. This may result in less precise estimates, which should be used with caution.", 
           startRow = nrow(country_by_sex_compiled) + 7)
+writeData(wb, "Country by sex", 
+          "Unshaded estimates are based on a larger sample size. This is likely to result in estimates of higher precision, although they will still be subject to some sampling variability.", 
+          startRow = nrow(country_by_sex_compiled) + 8)
 
 saveWorkbook(wb, paste0(output_directory, "/", "ad_hoc_", run_date, ".xlsx"), overwrite = TRUE)
 

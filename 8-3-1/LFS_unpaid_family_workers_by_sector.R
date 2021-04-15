@@ -191,9 +191,9 @@ csv <- for_publication_and_csv %>%
 publication_data <- for_publication_and_csv %>%
   mutate(Country = ifelse(Country == "" & Region == "", "United Kingdom", Country),
          Geocode = ifelse(Country == "United Kingdom", "K02000001", GeoCode),
-         Sex = ifelse(Sex == "", "Total", Sex),
-         Sex = ifelse(Sex == "Male", "Men", Sex),
-         Sex = ifelse(Sex == "Female", "Women", Sex),
+         Sex = ifelse(Sex == "", "Total", as.character(Sex)),
+         Sex = ifelse(Sex == "Male", "Men", as.character(Sex)),
+         Sex = ifelse(Sex == "Female", "Women", as.character(Sex)),
          Sector = ifelse(Sector == "", "Total", Sector),
          `Number of people in informal employment` = ifelse(is.na(informal_employment), "-", informal_employment),
          `Number of people in employment` = ifelse(is.na(Total_employment), "-", Total_employment),
@@ -266,9 +266,6 @@ suppressed_data <- quality_control %>%
   mutate(Year = substr(year_filepath, 1, 4)) %>% 
   select_if(not_all_na) %>% 
   select(-`Number of respondents`)
-
-  
-
 
 
 
