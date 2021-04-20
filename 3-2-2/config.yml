@@ -1,0 +1,12 @@
+default:
+  input_folder: "Example data"
+  output_folder: "Output"
+
+  country_of_occurrence_by_sex_tab_name: "Table 2"
+  first_header_row_country_by_sex: 4
+
+  area_of_residence_tab_name: "Table 3"
+  first_header_row_area_of_residence: 4
+
+  birthweight_by_mum_age_tab_name: "Table 10"
+  first_header_row_birthweight_by_mum_age: 4

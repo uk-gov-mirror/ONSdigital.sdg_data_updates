@@ -1,7 +1,7 @@
 # Author: Emma Wood
 # Date: 08/01/2021
 # Purpose: To create csv data for indicators 3.2.2, ...
-# Requirements: This script runs the code in the folder stated by indicator <- "indicator_folder_name" below. 
+# Requirements: This script runs the code in the folder stated by indicator <- "indicator_folder_name" below.
 # Runtime: last run approx. 22 seconds
 
 # install.packages("tidyr", dependencies = TRUE)
@@ -14,19 +14,19 @@
 
 rm(list = ls())
 
-library(tidyr)
-library(dplyr)
-library(tidyxl)
-library(unpivotr)
-library(stringr)
-
-library(SDGupdater)
+# library(tidyr)
+library(magrittr) # need to use library rather than namespace operator (::) for the pipe ( %>% )
+# library(tidyxl)
+# library(unpivotr)
+# library(stringr)
+#
+# library(SDGupdater)
 
 #----------------------------------------------------------------------------------------------
 
 indicator <- "3-2-2" # name of folder for indicator
 
-setwd(paste0("H:/Coding_repos/sdg_data_updates/", indicator))
+setwd(paste0("./", indicator))
 
 source("compile_tables.R")
 

@@ -1,8 +1,8 @@
-source("configs.R")
+config <- config::get()
 
-filename <- ask_user_for_filename(input_folder)
+filename <- SDGupdater::ask_user_for_filename(config$input_folder)
 
-if (get_characters_after_dot(filename) != "xlsx") {
+if (SDGupdater::get_characters_after_dot(filename) != "xlsx") {
   stop(paste("File must be an xlsx file. Save", filename, "as an xlsx and re-run script"))
 }
 
@@ -22,7 +22,7 @@ year <- unique_to_string(get_all_years(all_csv_data$Year))
 setwd('./Output')
 write.csv(all_csv_data, paste0("3-2-2_data_", year, ".csv"), row.names = FALSE)
 
-cat(paste0("csv for ", year, ", has been created and saved in '", current_directory, 
+cat(paste0("csv for ", year, ", has been created and saved in '", current_directory,
              "' as '3-2-2_data_", year, ".csv'", "\n\nFiles created for individual tabs can be viewed by clicking on them in the Global Environment."))
 
 

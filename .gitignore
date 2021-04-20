@@ -51,3 +51,4 @@ config.R
 configs.R
 Config.R
 Configs.R
+packrat/lib*/
