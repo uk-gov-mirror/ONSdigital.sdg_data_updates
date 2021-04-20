@@ -58,6 +58,20 @@ employed <- APS_data %>%
   filter(!is.na(Sector)) %>%  # removes anyone without an industry e.g. inactive people
   filter(employment_status %in% c(1:4))   # 1 = employed, 2 = self employed, 3 = Government schemes, 4 = unpaid family workers
 
+#####################
+# Year-specific edits
+
+unique(employed$Country)
+# Northern Ireland is -9 for Country in 2014
+unique(employed$GeoCode)
+# Northern Ireland isn't entered as a GeoCode in 2014
+
+if(year == "2014") {
+  employed <- employed %>% 
+    mutate(Country = ifelse(Country == "-9", "N92000002", as.character(Country))) %>% 
+    mutate(GeoCode = ifelse(Country == "N92000002", "N99999999", as.character(GeoCode)))
+}
+#####################
 
 unpaid_family_workers  <- employed %>% 
   filter(employment_status  == 4) # 4 refers to unpaid family workers
@@ -78,7 +92,7 @@ total_employed_by_region_by_sector <-  sum_weights(employed, c("GeoCode", "Secto
 regional_employed_totals <- bind_rows(total_employed_by_country, total_employed_by_region, 
                                         total_employed_by_country_by_sex, 
                                         total_employed_by_country_by_sector, total_employed_by_region_by_sector) %>% 
-  filter(!GeoCode %in% c("N99999999", "S99999999", "W99999999")) %>% 
+  filter(!GeoCode %in% c("N99999999", "S99999999", "W99999999")) %>%  
   mutate(GeoCode = coalesce(GeoCode, Country)) %>% 
   select(-Country)
 
@@ -190,7 +204,8 @@ csv <- for_publication_and_csv %>%
 #### publication ###
 publication_data <- for_publication_and_csv %>%
   mutate(Country = ifelse(Country == "" & Region == "", "United Kingdom", Country),
-         Geocode = ifelse(Country == "United Kingdom", "K02000001", GeoCode),
+         Country = ifelse(Region != "", "England", Country),
+         GeoCode = ifelse(Country == "United Kingdom", "K02000001", GeoCode),
          Sex = ifelse(Sex == "", "Total", as.character(Sex)),
          Sex = ifelse(Sex == "Male", "Men", as.character(Sex)),
          Sex = ifelse(Sex == "Female", "Women", as.character(Sex)),
@@ -198,7 +213,6 @@ publication_data <- for_publication_and_csv %>%
          `Number of people in informal employment` = ifelse(is.na(informal_employment), "-", informal_employment),
          `Number of people in employment` = ifelse(is.na(Total_employment), "-", Total_employment),
          `Proportion of employed people in informal employment` = ifelse(Value == "" | is.na(Value), "-", Value)) %>% 
-  mutate(Country = ifelse(Region != "", "England", Country)) %>% 
   select(Year, Sector, Country, Region, Sex, GeoCode, 
          `Number of people in employment`, `Number of people in informal employment`, `Proportion of employed people in informal employment`, 
          `Number of respondents`)
